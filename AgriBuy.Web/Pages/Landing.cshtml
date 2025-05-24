@@ -1,0 +1,54 @@
+﻿@page
+@model AgriBuy.Web.Pages.LandingModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container mt-5">
+    <h1 class="mb-4">Welcome, @Model.FullName!</h1>
+    <p class="text-muted">Role: <strong>@Model.Role</strong></p>
+
+    <div class="row">
+
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-person-lines-fill fs-1 text-info mb-2"></i>
+                    <h5 class="card-title">Update Profile</h5>
+                    <a asp-area="Accounts" asp-page="/Profile/Update" class="btn btn-outline-info mt-2">Update</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-lock fs-1 text-warning mb-2"></i>
+                    <h5 class="card-title">Change Password</h5>
+                    <a asp-area="Accounts" asp-page="/Profile/ChangePassword" class="btn btn-outline-warning mt-2">Change</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-box-arrow-right fs-1 text-danger mb-2"></i>
+                    <h5 class="card-title">Logout</h5>
+                    <a asp-page="/Accounts/Logout" class="btn btn-outline-danger mt-2">Logout</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-cart4 fs-1 text-success mb-2"></i>
+                    <h5 class="card-title">Shopping Cart</h5>
+                    <a asp-area="Buyer" asp-page="/ShoppingCart" class="btn btn-outline-success mt-2">View Cart</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

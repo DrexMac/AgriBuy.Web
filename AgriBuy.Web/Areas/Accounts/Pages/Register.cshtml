@@ -1,0 +1,91 @@
+﻿@page
+@model AgriBuy.Web.Areas.Accounts.Pages.RegisterModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Register";
+}
+
+<style>
+    body, html {
+        height: 100%;
+        background: linear-gradient(135deg, #81c784 0%, #388e3c 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .register-card {
+        width: 400px;
+        border-radius: 10px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        background: white;
+        padding: 2rem;
+    }
+
+    .register-header {
+        font-weight: 700;
+        color: #2e7d32;
+    }
+
+    .register-subheader {
+        font-weight: 500;
+        color: #4caf50;
+        margin-bottom: 1.5rem;
+    }
+
+    a {
+        color: #2e7d32;
+        font-weight: 600;
+    }
+
+        a:hover {
+            text-decoration: underline;
+        }
+</style>
+
+<div class="d-flex justify-content-center align-items-center min-vh-100">
+    <div class="register-card">
+        <h2 class="text-center register-header mb-3">Welcome to AgriBuy</h2>
+        <h4 class="text-center register-subheader mb-4">Create Your Account</h4>
+
+        <form method="post">
+            <div class="form-group mb-3">
+                <label asp-for="Input.FirstName">First Name <span class="text-danger">*</span></label>
+                <input asp-for="Input.FirstName" class="form-control" />
+                <span asp-validation-for="Input.FirstName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Input.LastName">Last Name</label>
+                <input asp-for="Input.LastName" class="form-control" />
+                <span asp-validation-for="Input.LastName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Input.EmailAddress">Email</label>
+                <input asp-for="Input.EmailAddress" class="form-control" />
+                <span asp-validation-for="Input.EmailAddress" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Input.Password">Password</label>
+                <input asp-for="Input.Password" type="password" class="form-control" />
+                <span asp-validation-for="Input.Password" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Input.ConfirmPassword">Confirm Password</label>
+                <input asp-for="Input.ConfirmPassword" type="password" class="form-control" />
+                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">Register</button>
+
+            <div class="text-center mt-3">
+                <a asp-area="Accounts" asp-page="/Login" class="btn btn-primary mx-2">Login Here</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

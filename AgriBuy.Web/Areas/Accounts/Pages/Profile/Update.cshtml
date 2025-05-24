@@ -1,0 +1,93 @@
+﻿@page
+@model AgriBuy.Web.Areas.Accounts.Pages.Profile.UpdateModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Update Profile";
+}
+
+<style>
+    body, html {
+        height: 100%;
+        background: linear-gradient(135deg, #81c784 0%, #388e3c 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .update-card {
+        width: 400px;
+        border-radius: 10px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        background: white;
+        padding: 2rem;
+    }
+
+    .update-header {
+        font-weight: 700;
+        color: #2e7d32;
+    }
+
+    .update-subheader {
+        font-weight: 500;
+        color: #4caf50;
+        margin-bottom: 1.5rem;
+    }
+
+    a {
+        color: #2e7d32;
+        font-weight: 600;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    .form-check-label {
+        user-select: none;
+    }
+</style>
+
+<div class="d-flex justify-content-center align-items-center min-vh-100">
+    <div class="update-card">
+        <h2 class="text-center update-header mb-3">Update Your Profile</h2>
+        <h4 class="text-center update-subheader mb-4">Manage your account details</h4>
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger">@Model.ErrorMessage</div>
+        }
+
+        <form method="post" novalidate>
+            <div class="form-group mb-3">
+                <label asp-for="Input.FirstName" class="form-label">First Name <span class="text-danger">*</span></label>
+                <input asp-for="Input.FirstName" class="form-control" />
+                <span asp-validation-for="Input.FirstName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Input.LastName" class="form-label">Last Name <span class="text-danger">*</span></label>
+                <input asp-for="Input.LastName" class="form-control" />
+                <span asp-validation-for="Input.LastName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Input.EmailAddress" class="form-label">Email Address <span class="text-danger">*</span></label>
+                <input asp-for="Input.EmailAddress" class="form-control" />
+                <span asp-validation-for="Input.EmailAddress" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-4">
+                <label asp-for="Input.Role" class="form-label">Role <span class="text-danger">*</span></label>
+                <select asp-for="Input.Role" class="form-control">
+                    <option value="Buyer">Buyer</option>
+                    <option value="Seller">Seller</option>
+                </select>
+                <span asp-validation-for="Input.Role" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">Update Profile</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

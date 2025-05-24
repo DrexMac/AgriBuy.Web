@@ -1,0 +1,29 @@
+﻿@page
+@model AgriBuy.Web.Areas.Buyer.Pages.ProductsModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    ViewData["Title"] = "Available Products";
+}
+
+<div class="container mt-5">
+    <h2>Available Products</h2>
+    <div class="row">
+        @foreach (var product in Model.Products)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm p-3">
+                    <h5>@product.Name</h5>
+                    <p><strong>Price:</strong> RM @product.UnitPrice.ToString("N2")</p>
+                    <p><strong>Unit:</strong> @product.UnitOfMeasure</p>
+
+                    <form method="post" asp-page-handler="AddToCart">
+                        <input type="hidden" name="productId" value="@product.Id" />
+                        <input type="number" name="quantity" value="1" min="1" class="form-control mb-2" />
+                        <button type="submit" class="btn btn-success w-100">Add to Cart</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,87 @@
+﻿@page
+@model AgriBuy.Web.Areas.Accounts.Pages.LoginModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Login";
+}
+
+<style>
+    body, html {
+        height: 100%;
+        background: linear-gradient(135deg, #81c784 0%, #388e3c 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .login-card {
+        width: 400px;
+        border-radius: 10px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        background: white;
+        padding: 2rem;
+    }
+
+    .login-header {
+        font-weight: 700;
+        color: #2e7d32;
+    }
+
+    .login-subheader {
+        font-weight: 500;
+        color: #4caf50;
+        margin-bottom: 1.5rem;
+    }
+
+    a {
+        color: #2e7d32;
+        font-weight: 600;
+    }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+    .form-check-label {
+        user-select: none;
+    }
+</style>
+
+<div class="d-flex justify-content-center align-items-center min-vh-100">
+    <div class="login-card">
+        <h2 class="text-center login-header mb-3">Welcome to AgriBuy</h2>
+        <h4 class="text-center login-subheader mb-4">Login to Your Account</h4>
+
+        <form method="post" novalidate>
+            <div class="form-group mb-3">
+                <label asp-for="Input.EmailAddress" class="form-label">Email <span class="text-danger">*</span></label>
+                <input asp-for="Input.EmailAddress" class="form-control" />
+                <span asp-validation-for="Input.EmailAddress" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Input.Password" class="form-label">Password <span class="text-danger">*</span></label>
+                <input asp-for="Input.Password" type="password" class="form-control" />
+                <span asp-validation-for="Input.Password" class="text-danger"></span>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger">@Model.ErrorMessage</div>
+            }
+
+            <button type="submit" class="btn btn-success w-100">Login</button>
+
+            <div class="text-center mt-3">
+                <a asp-area="Accounts" asp-page="/ForgotPassword">Forgot Password?</a>
+            </div>
+
+            <div class="text-center mt-4">
+                <p>Don't have an account?</p>
+                <a asp-area="Accounts" asp-page="/Register" class="btn btn-outline-secondary mx-2">Register Here</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

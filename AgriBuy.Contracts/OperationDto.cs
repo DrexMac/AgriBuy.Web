@@ -1,0 +1,92 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace AgriBuy.Contracts
+{
+    public class OperationDto<T>
+    {
+        public Guid? ReferenceId { get; set; }
+        public T? ReferenceData { get; set; }
+        public OpStatus? Status { get; set; }
+        public string? Message { get; set; }
+
+        public const string ROLE_ADMIN = "Admin";
+        public const string ROLE_CUSTOMER = "Customer";
+
+        public const string CART_SESSION_KEY = "EMallCartSession";
+        public const string FULLNAME_SESSION_KEY = "FullName";
+
+        public const string CONTENT_JSON = "application/json";
+
+        public static class PaymentStatus
+        {
+            public const string APPROVED = "Approved";
+            public const string REJECTED = "Rejected";
+            public const string REFUNDED = "Refunded";
+            public const string CANCELLED = "Cancelled";
+        }
+
+        public static class OrderStatus
+        {
+            public const string APPROVED = "Approved";
+            public const string PROCESSING = "Processing";
+            public const string SHIPPED = "Shipped";
+            public const string CANCELLED = "Cancelled";
+            public const string COMPLETE = "Completed";
+            public const string REFUNDED = "Refunded";
+        }
+
+        public static class StripeChargeStatus
+        {
+            public const string SUCCEEDED = "succeeded";
+            public const string PENDING = "pending";
+            public const string FAILED = "failed";
+        }
+
+        // For login use to differentiate between user not found and incorrect credentials
+        public static class StatusCode
+        {
+            public const int UNAUTHORIZED = 401;
+            public const int NOTFOUND = 404;
+            public const int OK = 200;
+            public const int BAD_REQUEST = 400;
+        }
+
+        public static class Policy
+        {
+            public const string ADMIN_ONLY = "AdminOnly";
+            public const string CUSTOMER_ONLY = "CustomerOnly";
+            public const string AUTHENTICATED_ONLY = "AuthenticatedOnly";
+        }
+
+        public enum OpStatus
+        {
+            Ok = 0,
+            Fail = 1,
+        }
+
+        public enum OrderAction
+        {
+            PROCESS = 1,
+            SHIP = 2,
+            CANCEL = 3,
+            REFUND = 4,
+            COMPLETE = 5
+        }
+
+        public enum EntityActionType
+        {
+            Update = 1,
+            Delete = 2
+        }
+       
+        
+    }
+    
+}
+  
+
+

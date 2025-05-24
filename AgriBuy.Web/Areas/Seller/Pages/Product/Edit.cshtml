@@ -1,0 +1,60 @@
+﻿@page "{id:guid}"
+@model AgriBuy.Web.Areas.Seller.Pages.Product.EditModel
+@{
+    ViewData["Title"] = "Update Product";
+}
+
+<form method="post">
+    <div class="row p-3 border">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="col-12 border-bottom mb-3">
+            <h2 class="text-primary">Edit Product</h2>
+        </div>
+
+        <input type="hidden" asp-for="Product.Id" />
+
+        <div class="form-group row mb-3">
+            <label asp-for="Product.Name" class="col-3 col-form-label"></label>
+            <div class="col-9">
+                <input asp-for="Product.Name" class="form-control" />
+                <span asp-validation-for="Product.Name" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row mb-3">
+            <label asp-for="Product.Description" class="col-3 col-form-label"></label>
+            <div class="col-9">
+                <textarea asp-for="Product.Description" class="form-control"></textarea>
+                <span asp-validation-for="Product.Description" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row mb-3">
+            <label asp-for="Product.UnitOfMeasure" class="col-3 col-form-label"></label>
+            <div class="col-9">
+                <input asp-for="Product.UnitOfMeasure" class="form-control" />
+                <span asp-validation-for="Product.UnitOfMeasure" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row mb-3">
+            <label asp-for="Product.UnitPrice" class="col-3 col-form-label"></label>
+            <div class="col-9">
+                <input asp-for="Product.UnitPrice" class="form-control" type="number" step="0.01" />
+                <span asp-validation-for="Product.UnitPrice" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row mb-3">
+            <label asp-for="Product.Quantity" class="col-3 col-form-label"></label>
+            <div class="col-9">
+                <input asp-for="Product.Quantity" class="form-control" />
+                <span asp-validation-for="Product.Quantity" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row mb-3">
+            <label class="col-3 col-form-label">Store</label>
+        </div>
+    </div>
+</form>

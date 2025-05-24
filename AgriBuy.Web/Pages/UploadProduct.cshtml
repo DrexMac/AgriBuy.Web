@@ -1,0 +1,33 @@
+﻿@page
+@model UploadProductModel
+@{
+    ViewData["Title"] = "Upload Product";
+}
+
+<h2>Upload Product</h2>
+
+<form method="post">
+    <div>
+        <label>Name:</label>
+        <input asp-for="Product.Name" />
+    </div>
+    <div>
+        <label>Description:</label>
+        <input asp-for="Product.Description" />
+    </div>
+    <div>
+        <label>Unit Of Measure:</label>
+        <input asp-for="Product.UnitOfMeasure" />
+    </div>
+    <div>
+        <label>Price:</label>
+        <input asp-for="Product.UnitPrice" />
+    </div>
+    <div>
+        <label>Quantity:</label>
+        <input asp-for="Product.Quantity" />
+    </div>
+    <div>
+        <input type="submit" value="Upload" />
+    </div>
+</form>

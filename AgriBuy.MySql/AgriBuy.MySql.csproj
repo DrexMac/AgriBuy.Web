@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EntityFramework" Version="6.5.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AgriBuy.Contracts\AgriBuy.Contracts.csproj" />
+    <ProjectReference Include="..\AgriBuy.EntityFramework\AgriBuy.EntityFramework.csproj" />
+  </ItemGroup>
+
+</Project>

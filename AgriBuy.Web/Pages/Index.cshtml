@@ -1,0 +1,15 @@
+﻿@page
+@model AgriBuy.Web.Pages.IndexModel
+@{
+    ViewData["Title"] = "Welcome to AgriBuy";
+}
+
+<div class="container mt-5 text-center">
+    <h1 class="mb-4">Welcome to AgriBuy!</h1>
+    <p class="lead">Buy and sell farm products with ease.</p>
+
+    <div class="mt-4">
+            <a asp-area="Accounts" asp-page="/Login" class="btn btn-primary mx-2">Login</a>
+            <a asp-area="Accounts" asp-page="/Register" class="btn btn-outline-secondary mx-2">Register</a>
+    </div>
+</div>
