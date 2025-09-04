@@ -1,0 +1,47 @@
+﻿@page
+@model AgriBuy.Web.Areas.Seller.Pages.Products.DeleteModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    ViewData["Title"] = "Delete Product";
+}
+
+<div class="container mt-5">
+    <h1 class="display-4 text-center">Are you sure you want to permanently delete this Product?</h1>
+
+    @if (Model.Item == null)
+    {
+        <h2>No record found</h2>
+    }
+    else
+    {
+        <form method="post">
+            <input type="hidden" asp-for="Item.Id" />
+
+            <div class="mb-3">
+                <label class="form-label">Product Name</label>
+                <input type="text" class="form-control" asp-for="Item.Name" disabled />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Unit Of Measure</label>
+                <input type="text" class="form-control" asp-for="Item.UnitOfMeasure" disabled />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Unit Price</label>
+                <input type="text" class="form-control" asp-for="Item.UnitPrice" disabled />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Quantity</label>
+                <input type="text" class="form-control" asp-for="Item.Quantity" disabled />
+            </div>
+
+            <div class="form-group">
+                <a asp-page="Index" class="btn btn-success">Back</a>
+                <button type="submit" class="btn btn-danger">Hard Delete</button>
+            </div>
+        </form>
+    }
+</div>

@@ -1,0 +1,21 @@
+﻿@page "{itemid:guid}"
+@model AgriBuy.Web.Areas.Seller.Pages.Products.DetailsModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Product Details";
+}
+
+<h2>@Model.Product.Name</h2>
+@if (!string.IsNullOrEmpty(Model.Product.Description))
+{
+    <p>@Model.Product.Description</p>
+}
+
+<hr />
+<p><strong>Unit Price:</strong> @Model.Product.UnitPrice.ToString("C")</p>
+<p><strong>Unit Of Measure:</strong> @Model.Product.UnitOfMeasure</p>
+<p><strong>Quantity:</strong> @Model.Product.Quantity</p>
+
+<div class="form-group mt-2">
+    <a class="btn btn-primary" asp-page="Index">Back to Store List</a>
+</div>

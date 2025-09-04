@@ -14,6 +14,7 @@ namespace AgriBuy.Contracts.Dto
         public Guid StoreId { get; set; }
         public decimal TotalPrice { get; set; }
         public bool IsPaid { get; set; }
+        public bool IsDeleted { get; set; }
         public string? ORNumber { get; set; }
         public DateTime OrderDate { get; set; }
         public DateTime? PayDate { get; set; }

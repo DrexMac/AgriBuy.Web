@@ -1,0 +1,122 @@
+﻿@page
+@model AgriBuy.Web.Areas.Seller.Pages.Products.CreateModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Create Product";
+}
+
+<style>
+    body, html {
+        height: 100%;
+        background: linear-gradient(135deg, #81c784 0%, #388e3c 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .create-card {
+        width: 600px;
+        border-radius: 10px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        background: white;
+        padding: 2rem;
+    }
+
+    .create-header {
+        font-weight: 700;
+        color: #2e7d32;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .form-control, select, textarea {
+        margin-bottom: 1rem;
+    }
+
+    .btn-create {
+        background-color: #2e7d32;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+        .btn-create:hover {
+            background-color: #27632a;
+        }
+
+    a.back-link {
+        color: #2e7d32;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 1.5rem;
+    }
+
+        a.back-link:hover {
+            text-decoration: underline;
+        }
+</style>
+
+<div class="d-flex justify-content-center align-items-center min-vh-100">
+    <div class="create-card">
+        <h2 class="create-header"><i class="bi bi-plus-circle"></i> Add New Product</h2>
+
+        <form method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label asp-for="Input.Name"></label>
+                <input asp-for="Input.Name" class="form-control" />
+                <span asp-validation-for="Input.Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Input.UnitOfMeasure"></label>
+                <select asp-for="Input.UnitOfMeasure" class="form-control">
+                    <option value="">-- Select Unit --</option>
+                    <option value="Kg">Kg</option>
+                    <option value="L">L</option>
+                    <option value="Piece">Piece</option>
+                    <option value="Box">Box</option>
+                    <option value="Pack">Pack</option>
+                </select>
+                <span asp-validation-for="Input.UnitOfMeasure" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Input.UnitPrice"></label>
+                <input asp-for="Input.UnitPrice" class="form-control" />
+                <span asp-validation-for="Input.UnitPrice" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Input.Quantity"></label>
+                <input asp-for="Input.Quantity" class="form-control" />
+                <span asp-validation-for="Input.Quantity" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Input.Description"></label>
+                <textarea asp-for="Input.Description" class="form-control"></textarea>
+                <span asp-validation-for="Input.Description" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Input.Image"></label>
+                <input asp-for="Input.Image" type="file" class="form-control" />
+                <span asp-validation-for="Input.Image" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mt-3">
+                <button type="submit" class="btn-create">Create</button>
+            </div>
+        </form>
+
+        <a asp-page="/Landing" class="back-link">← Back to Dashboard</a>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

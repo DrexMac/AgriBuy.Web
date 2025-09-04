@@ -2,9 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AgriBuy.Models.Models
 {
@@ -18,8 +15,8 @@ namespace AgriBuy.Models.Models
         public int Points { get; set; }
         public bool IsDeleted { get; set; }
         public bool? IsActive { get; set; }
-        public ICollection<LoginInfo> LoginInfos { get; set; } = [];
-        public ICollection<Order> Orders { get; set; } = [];
+        public ICollection<LoginInfo> LoginInfos { get; set; } = new List<LoginInfo>();
+        public ICollection<Order> Orders { get; set; } = new List<Order>();
         public string? PasswordHash { get; set; }
         public Store? Store { get; set; }
     }

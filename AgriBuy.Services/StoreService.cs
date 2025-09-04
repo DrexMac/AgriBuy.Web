@@ -20,28 +20,48 @@ namespace AgriBuy.Services
             _mapper = mapper;
         }
 
-        public async Task<StoreDto?> GetByIdAsync(Guid id)
+        public async Task<Store?> GetByIdAsync(Guid id)
         {
             var entity = await _repository.Find(x => x.Id == id).FirstOrDefaultAsync();
-            return _mapper.Map<StoreDto?>(entity);
+            return entity;
         }
 
-        public async Task<IEnumerable<StoreDto>> GetAllAsync()
+        public async Task<IEnumerable<Store>> GetAllAsync()
         {
             var entities = await _repository.All().ToListAsync();
-            return _mapper.Map<IEnumerable<StoreDto>>(entities);
+            return entities;
         }
 
         public async Task<IEnumerable<StoreDto>> SearchAsync(string searchTerm)
         {
             var entities = await _repository.Find(x =>
-                (x.Name != null && x.Name.Contains(searchTerm)) ||
-                (x.Description != null && x.Description.Contains(searchTerm))
+                (x.Name != null && x.Name.Contains(searchTerm))
             ).ToListAsync();
 
             return _mapper.Map<IEnumerable<StoreDto>>(entities);
         }
 
+        public async Task AddAsync(Store store)
+        {
+            await _repository.AddAsync(store);
+            await _repository.SaveChangesAsync();
+        }
+
+        public async Task UpdateAsync(Store store)
+        {
+            _repository.Update(store);
+            await _repository.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(Guid id)
+        {
+            var entity = await _repository.Find(x => x.Id == id).FirstOrDefaultAsync();
+            if (entity != null)
+            {
+                _repository.Delete(entity);
+                await _repository.SaveChangesAsync();
+            }
+        }
 
         public async Task AddAsync(StoreDto store)
         {
@@ -57,14 +77,17 @@ namespace AgriBuy.Services
             await _repository.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(Guid id)
+        
+        public async Task<Store?> GetStoreByUserIdAsync(Guid userId)
         {
-            var entity = await _repository.Find(x => x.Id == id).FirstOrDefaultAsync();
-            if (entity != null)
-            {
-                _repository.Delete(entity);
-                await _repository.SaveChangesAsync();
-            }
+            return await _repository.Find(s => s.UserId == userId).FirstOrDefaultAsync();
+        }
+
+        public async Task AddAsync(StoreViewModel store)
+        {
+            var entity = _mapper.Map<Store>(store);
+            await _repository.AddAsync(entity);
+            await _repository.SaveChangesAsync();
         }
     }
 }

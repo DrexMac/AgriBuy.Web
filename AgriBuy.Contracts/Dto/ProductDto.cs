@@ -14,11 +14,10 @@ namespace AgriBuy.Contracts.Dto
         public string Name { get; set; } = null!;
         public string? Description { get; set; }
         public string UnitOfMeasure { get; set; } = null!;
-        public decimal UnitPrice { get; set; } 
+        public decimal UnitPrice { get; set; }
         public int Quantity { get; set; }
-        public string? ImageUrl { get; set; }
-
-
-
+        public bool IsAvailable { get; set; }
+        public Guid UserId { get; set; }
     }
+
 }

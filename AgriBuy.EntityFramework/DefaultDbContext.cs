@@ -5,7 +5,8 @@ namespace AgriBuy.EntityFramework
 {
     public class DefaultDbContext : DbContext
     {
-        public DefaultDbContext(DbContextOptions<DefaultDbContext> options) : base(options)
+        public DefaultDbContext(DbContextOptions<DefaultDbContext> options)
+            : base(options)
         {
         }
 
@@ -21,21 +22,54 @@ namespace AgriBuy.EntityFramework
         {
             base.OnModelCreating(modelBuilder);
 
-            // Table mappings
             ConfigureTableMappings(modelBuilder);
-
-            // Unique index on User Email
             ConfigureUserEmailIndex(modelBuilder);
-
-            // Configure relationships
             ConfigureRelationships(modelBuilder);
-
-            // Configure decimal precision for monetary fields
             ConfigureDecimalPrecision(modelBuilder);
-
-            // Configure string length and required fields
             ConfigureStringLengthAndRequiredFields(modelBuilder);
+
+            // --- Fixed GUIDs for seed data ---
+            var userId1 = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            var storeId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
+            var productId1 = Guid.Parse("22222222-2222-2222-2222-222222222222");
+            var productId2 = Guid.Parse("33333333-3333-3333-3333-333333333333");
+
+            // ✅ Seed User to satisfy Store FK constraint
+            modelBuilder.Entity<User>().HasData(new User
+            {
+                Id = userId1,
+                FirstName = "Agri",
+                LastName = "Owner",
+                EmailAddress = "owner@agribuy.com"
+            });
+
+            modelBuilder.Entity<Store>().HasData(new Store
+            {
+                Id = storeId1,
+                Name = "AgriBuy Store",
+                UserId = userId1 // ✅ Corrected FK value
+            });
+
+            modelBuilder.Entity<Product>().HasData(
+                new Product
+                {
+                    Id = productId1,
+                    Name = "Organic Apples",
+                    UnitPrice = 5.50m,
+                    UnitOfMeasure = "Kg",
+                    StoreId = storeId1
+                },
+                new Product
+                {
+                    Id = productId2,
+                    Name = "Fresh Milk",
+                    UnitPrice = 2.20m,
+                    UnitOfMeasure = "L",
+                    StoreId = storeId1
+                }
+            );
         }
+
 
         private void ConfigureTableMappings(ModelBuilder modelBuilder)
         {
@@ -57,56 +91,48 @@ namespace AgriBuy.EntityFramework
 
         private void ConfigureRelationships(ModelBuilder modelBuilder)
         {
-            // Order - OrderItem
             modelBuilder.Entity<Order>()
                 .HasMany(o => o.OrderItems)
                 .WithOne(oi => oi.Order)
                 .HasForeignKey(oi => oi.OrderId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Store - Products
+            modelBuilder.Entity<OrderItem>()
+                .HasOne(oi => oi.Product)
+                .WithMany()
+                .HasForeignKey(oi => oi.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Store>()
                 .HasMany(s => s.Products)
                 .WithOne(p => p.Store)
                 .HasForeignKey(p => p.StoreId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Store - User (Seller)
-            modelBuilder.Entity<Store>()
-                .HasOne(s => s.User)
-                .WithMany()
-                .HasForeignKey(s => s.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // ShoppingCart - User
             modelBuilder.Entity<ShoppingCart>()
                 .HasOne(sc => sc.User)
                 .WithMany()
                 .HasForeignKey(sc => sc.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // ShoppingCart - Product
             modelBuilder.Entity<ShoppingCart>()
                 .HasOne(sc => sc.Product)
                 .WithMany()
                 .HasForeignKey(sc => sc.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // LoginInfo - User
             modelBuilder.Entity<LoginInfo>()
                 .HasOne(li => li.User)
-                .WithMany()
+                .WithMany(u => u.LoginInfos)
                 .HasForeignKey(li => li.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Order - User
             modelBuilder.Entity<Order>()
                 .HasOne(o => o.User)
-                .WithMany()
+                .WithMany(u => u.Orders)
                 .HasForeignKey(o => o.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Order - Store
             modelBuilder.Entity<Order>()
                 .HasOne(o => o.Store)
                 .WithMany()

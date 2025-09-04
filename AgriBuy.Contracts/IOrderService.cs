@@ -8,14 +8,9 @@ using System.Threading.Tasks;
 
 namespace AgriBuy.Contracts
 {
-    public interface IOrderService
+    public interface IOrderService : IService<OrderDto>
     {
-        Task<OrderDto?> GetByIdAsync(Guid id);
         Task<IEnumerable<OrderDto>> GetByUserIdAsync(Guid userId);
-
-        Task<IEnumerable<OrderDto>> GetAllAsync();
-        Task AddAsync(OrderDto orderDto);
-        Task UpdateAsync(OrderDto orderDto);
-        Task DeleteAsync(Guid id);
+        Task AddAsync(OrderDto orderDto, Guid userId);
     }
 }

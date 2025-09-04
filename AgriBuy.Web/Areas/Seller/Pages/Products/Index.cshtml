@@ -1,0 +1,107 @@
+﻿@page
+@model AgriBuy.Web.Areas.Seller.Pages.Products.IndexModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    ViewData["Title"] = "My Product List";
+}
+
+<style>
+    body, html {
+        height: 100%;
+        background: linear-gradient(135deg, #81c784 0%, #388e3c 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .product-list-card {
+        width: 900px;
+        border-radius: 10px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        background: white;
+        padding: 2rem 2.5rem;
+        margin-top: 3rem;
+    }
+
+    .product-list-header {
+        font-weight: 700;
+        color: #2e7d32;
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .table thead {
+        background-color: #a5d6a7;
+        color: #1b5e20;
+    }
+
+    .btn-action {
+        margin-right: 0.3rem;
+    }
+
+    .empty-message {
+        text-align: center;
+        color: #558b2f;
+        font-weight: 600;
+        margin: 2rem 0;
+    }
+
+    .create-btn {
+        background-color: #388e3c;
+        color: white;
+        font-weight: 600;
+        border-radius: 6px;
+        margin-bottom: 1.5rem;
+    }
+
+        .create-btn:hover {
+            background-color: #2e7d32;
+            color: white;
+        }
+</style>
+
+<div class="d-flex justify-content-center align-items-center min-vh-100">
+    <div class="product-list-card">
+        <h2 class="product-list-header">My Product List</h2>
+        <div class="mb-3 text-end">
+            <a asp-page="Create" class="btn create-btn">+ Add Product</a>
+        </div>
+        <table class="table table-striped table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Unit Of Measure</th>
+                    <th>Unit Price</th>
+                    <th>Quantity</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Products != null && Model.Products.Any())
+                {
+                    @foreach (var product in Model.Products)
+                    {
+                        <tr>
+                            <td>@product.Name</td>
+                            <td>@product.UnitOfMeasure</td>
+                            <td>RM @product.UnitPrice.ToString("N2")</td>
+                            <td>@product.Quantity</td>
+                            <td>
+                                <a asp-page="./Edit" asp-route-itemid="@product.Id" class="btn btn-sm btn-primary btn-action">Edit</a>
+                                <a asp-page="./Details" asp-route-itemid="@product.Id" class="btn btn-sm btn-success btn-action">Details</a>
+                                <a asp-page="./Delete" asp-route-itemid="@product.Id" class="btn btn-sm btn-danger btn-action">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="empty-message">
+                            Products not available at this moment!
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

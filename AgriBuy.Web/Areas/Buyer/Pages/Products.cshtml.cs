@@ -23,7 +23,7 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
 
         public async Task OnGetAsync()
         {
-            Products = await _productService.GetAllAsync();
+            Products = (IEnumerable<ProductDto>)await _productService.GetAllAsync();
         }
 
         public async Task<IActionResult> OnPostAddToCartAsync(Guid productId, int quantity)
@@ -54,7 +54,7 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
             };
 
             await _shoppingCartService.AddAsync(cartItem);
-            return RedirectToPage(); // Refresh the page
+            return RedirectToPage("/Buyer/ShoppingCart"); 
         }
     }
 }

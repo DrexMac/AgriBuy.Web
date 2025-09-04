@@ -15,12 +15,17 @@ namespace AgriBuy.Contracts.MapperProfiles
         public AgriBuyMapperProfile()
         {
             CreateMap<LoginInfo, LoginInfoDto>().ReverseMap();
-            CreateMap<Order, OrderDto>().ReverseMap();
+
+            CreateMap<Order, OrderDto>()
+                .ForMember(dest => dest.OrderItems, opt => opt.MapFrom(src => src.OrderItems))
+                .ReverseMap();
+
             CreateMap<OrderItem, OrderItemDto>().ReverseMap();
             CreateMap<Product, ProductDto>().ReverseMap();
             CreateMap<ProductViewModel, ProductDto>().ReverseMap();
             CreateMap<ShoppingCart, ShoppingCartDto>().ReverseMap();
             CreateMap<Store, StoreDto>().ReverseMap();
+            CreateMap<Store, StoreViewModel>().ReverseMap(); 
             CreateMap<User, UserDto>().ReverseMap();
 
             CreateMap<User, UserDto>()

@@ -59,7 +59,7 @@ namespace AgriBuy.Web.Areas.Accounts.Pages.Profile
 
                 await _userService.UpdateAsync(Input);
 
-                return RedirectToPage("/Landing");
+                return RedirectToPage("/Landing"); 
             }
             catch (Exception ex)
             {

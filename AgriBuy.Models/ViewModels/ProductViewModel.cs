@@ -1,34 +1,35 @@
 ﻿using AgriBuy.Models.Models;
 using Microsoft.AspNetCore.Http;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace AgriBuy.Models.ViewModels
 {
     public class ProductViewModel
     {
-        public Guid Id { get; set; }
+        public Guid ProductId { get; set; } = Guid.NewGuid();
 
         [Required]
-        public string Name { get; set; } = null!;
-
-        public string? Description { get; set; }
+        [DisplayName("Product Name")]
+        public string? Name { get; set; }
 
         [Required]
-        public string UnitOfMeasure { get; set; } = null!;
+        [DisplayName("Unit of Measure")]
+        public string? UnitOfMeasure { get; set; }
 
-        [Range(0, double.MaxValue)]
+        [Required]
+        [Range(0.01, double.MaxValue, ErrorMessage = "UnitPrice must be greater than zero.")]
         public decimal UnitPrice { get; set; }
 
-        [Range(0, int.MaxValue)]
+        [Range(0, int.MaxValue, ErrorMessage = "Quantity cannot be negative.")]
         public int Quantity { get; set; }
 
-        [Required]
-        public Guid StoreId { get; set; }
+        [DisplayName("Description")]
+        public string? Description { get; set; }
 
-        public Product? Product { get; set; }
-        public List<string> Stores { get; set; } = new();
-        public List<Guid> StoreIds { get; set; } = new();
+        [DisplayName("Product Image")]
+        public IFormFile? Image { get; set; }
 
-        public IFormFile? UploadedImage { get; set; }
+        public IEnumerable<Guid>? OrderIds { get; set; }
     }
 }

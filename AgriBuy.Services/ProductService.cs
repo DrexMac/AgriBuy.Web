@@ -1,12 +1,13 @@
 ﻿using AgriBuy.Contracts;
 using AgriBuy.Contracts.Dto;
+using AgriBuy.EntityFramework;
 using AgriBuy.Models.Models;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using AgriBuy.EntityFramework;
 
 namespace AgriBuy.Services
 {
@@ -23,11 +24,42 @@ namespace AgriBuy.Services
             _mapper = mapper;
         }
 
-        public async Task<ProductDto?> GetByIdAsync(Guid id)
+        // IService<Product> implementation
+        public async Task<IEnumerable<Product>> GetAllAsync()
+        {
+            return await _repository.All().ToListAsync();
+        }
+
+        public async Task<Product?> GetByIdAsync(Guid id)
+        {
+            return await _repository.Find(x => x.Id == id).FirstOrDefaultAsync();
+        }
+
+        public async Task AddAsync(Product entity)
+        {
+            entity.Id = Guid.NewGuid();
+            await _repository.AddAsync(entity);
+            await _repository.SaveChangesAsync();
+        }
+
+        public async Task UpdateAsync(Product entity)
+        {
+            _repository.Update(entity);
+            await _repository.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(Guid id)
         {
             var entity = await _repository.Find(x => x.Id == id).FirstOrDefaultAsync();
-            return _mapper.Map<ProductDto?>(entity);
+            if (entity != null)
+            {
+                _repository.Delete(entity);
+                await _repository.SaveChangesAsync();
+            }
         }
+
+        // IProductService-specific methods
+        
 
         public async Task<IEnumerable<ProductDto>> GetByUserIdAsync(Guid userId)
         {
@@ -39,35 +71,29 @@ namespace AgriBuy.Services
             return _mapper.Map<IEnumerable<ProductDto>>(entities);
         }
 
-        public async Task<IEnumerable<ProductDto>> GetAllAsync()
+       
+        public async Task AddAsync(ProductDto productDto, Guid userId)
         {
-            var entities = await _repository.All().ToListAsync();
-            return _mapper.Map<IEnumerable<ProductDto>>(entities);
-        }
-
-        public async Task AddAsync(ProductDto productDto, Guid userId) 
-        {
-            var store = await _context.Stores
-        .FirstOrDefaultAsync(s => s.UserId == userId);
+            var store = await _context.Stores.FirstOrDefaultAsync(s => s.UserId == userId);
 
             if (store == null)
             {
-                
                 store = new Store
                 {
                     Id = Guid.NewGuid(),
                     UserId = userId,
-                    Name = "My Store", 
-                    Description = "Auto-created store for user"
+                    Name = "My Store",
                 };
                 await _context.Stores.AddAsync(store);
-                await _context.SaveChangesAsync(); 
+                await _context.SaveChangesAsync();
             }
 
-            
             var entity = _mapper.Map<Product>(productDto);
             entity.Id = Guid.NewGuid();
             entity.StoreId = store.Id;
+            entity.UserId = userId;
+            entity.IsAvailable = productDto.IsAvailable;
+            entity.Description = productDto.Description;
 
             await _context.Products.AddAsync(entity);
             await _context.SaveChangesAsync();
@@ -80,14 +106,6 @@ namespace AgriBuy.Services
             await _repository.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(Guid id) 
-        {
-            var entity = await _repository.Find(x => x.Id == id).FirstOrDefaultAsync();
-            if (entity != null)
-            {
-                _repository.Delete(entity);
-                await _repository.SaveChangesAsync();
-            }
-        }
+        
     }
 }

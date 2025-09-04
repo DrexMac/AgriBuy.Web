@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgriBuy.EntityFramework.Migrations
 {
     [DbContext(typeof(DefaultDbContext))]
-    [Migration("20250512164905_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250729080716_SeedWithValidUser")]
+    partial class SeedWithValidUser
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -46,17 +46,12 @@ namespace AgriBuy.EntityFramework.Migrations
                     b.Property<Guid?>("UserId")
                         .HasColumnType("char(36)");
 
-                    b.Property<Guid?>("UserId1")
-                        .HasColumnType("char(36)");
-
                     b.Property<string>("Value")
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
-
-                    b.HasIndex("UserId1");
 
                     b.ToTable("LoginInfos", (string)null);
                 });
@@ -86,6 +81,9 @@ namespace AgriBuy.EntityFramework.Migrations
                     b.Property<DateTime?>("PayDate")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<Guid?>("ProductId")
+                        .HasColumnType("char(36)");
+
                     b.Property<Guid>("StoreId")
                         .HasColumnType("char(36)");
 
@@ -95,16 +93,13 @@ namespace AgriBuy.EntityFramework.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("char(36)");
 
-                    b.Property<Guid?>("UserId1")
-                        .HasColumnType("char(36)");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
 
                     b.HasIndex("StoreId");
 
                     b.HasIndex("UserId");
-
-                    b.HasIndex("UserId1");
 
                     b.ToTable("Orders", (string)null);
                 });
@@ -128,22 +123,16 @@ namespace AgriBuy.EntityFramework.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("UnitOfMeasure")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
 
                     b.HasIndex("ProductId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("OrderItems", (string)null);
                 });
@@ -156,6 +145,12 @@ namespace AgriBuy.EntityFramework.Migrations
 
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
+
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -175,11 +170,40 @@ namespace AgriBuy.EntityFramework.Migrations
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("StoreId");
 
                     b.ToTable("Products", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
+                            IsAvailable = false,
+                            IsDeleted = false,
+                            Name = "Organic Apples",
+                            Quantity = 0,
+                            StoreId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            UnitOfMeasure = "Kg",
+                            UnitPrice = 5.50m,
+                            UserId = new Guid("00000000-0000-0000-0000-000000000000")
+                        },
+                        new
+                        {
+                            Id = new Guid("33333333-3333-3333-3333-333333333333"),
+                            IsAvailable = false,
+                            IsDeleted = false,
+                            Name = "Fresh Milk",
+                            Quantity = 0,
+                            StoreId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            UnitOfMeasure = "L",
+                            UnitPrice = 2.20m,
+                            UserId = new Guid("00000000-0000-0000-0000-000000000000")
+                        });
                 });
 
             modelBuilder.Entity("AgriBuy.Models.Models.ShoppingCart", b =>
@@ -212,9 +236,6 @@ namespace AgriBuy.EntityFramework.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("longtext");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -225,9 +246,18 @@ namespace AgriBuy.EntityFramework.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Stores", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
+                            Name = "AgriBuy Store",
+                            UserId = new Guid("00000000-0000-0000-0000-000000000000")
+                        });
                 });
 
             modelBuilder.Entity("AgriBuy.Models.Models.User", b =>
@@ -283,19 +313,19 @@ namespace AgriBuy.EntityFramework.Migrations
             modelBuilder.Entity("AgriBuy.Models.Models.LoginInfo", b =>
                 {
                     b.HasOne("AgriBuy.Models.Models.User", "User")
-                        .WithMany()
+                        .WithMany("LoginInfos")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("AgriBuy.Models.Models.User", null)
-                        .WithMany("LoginInfos")
-                        .HasForeignKey("UserId1");
 
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("AgriBuy.Models.Models.Order", b =>
                 {
+                    b.HasOne("AgriBuy.Models.Models.Product", null)
+                        .WithMany("Orders")
+                        .HasForeignKey("ProductId");
+
                     b.HasOne("AgriBuy.Models.Models.Store", "Store")
                         .WithMany()
                         .HasForeignKey("StoreId")
@@ -303,14 +333,10 @@ namespace AgriBuy.EntityFramework.Migrations
                         .IsRequired();
 
                     b.HasOne("AgriBuy.Models.Models.User", "User")
-                        .WithMany()
+                        .WithMany("Orders")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("AgriBuy.Models.Models.User", null)
-                        .WithMany("Orders")
-                        .HasForeignKey("UserId1");
 
                     b.Navigation("Store");
 
@@ -322,26 +348,18 @@ namespace AgriBuy.EntityFramework.Migrations
                     b.HasOne("AgriBuy.Models.Models.Order", "Order")
                         .WithMany("OrderItems")
                         .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("AgriBuy.Models.Models.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AgriBuy.Models.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Order");
 
                     b.Navigation("Product");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("AgriBuy.Models.Models.Product", b =>
@@ -376,18 +394,21 @@ namespace AgriBuy.EntityFramework.Migrations
 
             modelBuilder.Entity("AgriBuy.Models.Models.Store", b =>
                 {
-                    b.HasOne("AgriBuy.Models.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
+                    b.HasOne("AgriBuy.Models.Models.User", null)
+                        .WithOne("Store")
+                        .HasForeignKey("AgriBuy.Models.Models.Store", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("AgriBuy.Models.Models.Order", b =>
                 {
                     b.Navigation("OrderItems");
+                });
+
+            modelBuilder.Entity("AgriBuy.Models.Models.Product", b =>
+                {
+                    b.Navigation("Orders");
                 });
 
             modelBuilder.Entity("AgriBuy.Models.Models.Store", b =>
@@ -400,6 +421,8 @@ namespace AgriBuy.EntityFramework.Migrations
                     b.Navigation("LoginInfos");
 
                     b.Navigation("Orders");
+
+                    b.Navigation("Store");
                 });
 #pragma warning restore 612, 618
         }

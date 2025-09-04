@@ -6,86 +6,243 @@
 }
 
 <style>
-    body, html {
-        height: 100%;
-        background: linear-gradient(135deg, #81c784 0%, #388e3c 100%);
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        display: flex;
+        height: 100vh;
+        background-color: #f4f8ed;
     }
 
-    .register-card {
-        width: 400px;
-        border-radius: 10px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    .container {
+        width: 100%;
+        max-width: 1000px;
+        margin: auto;
+        display: flex;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
         background: white;
-        padding: 2rem;
+        border-radius: 8px;
+        overflow: hidden;
     }
 
-    .register-header {
+    /* Left panel (form) */
+    .left-panel {
+        background: white;
+        padding: 40px 50px;
+        width: 55%;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+
+    .logo {
         font-weight: 700;
-        color: #2e7d32;
+        color: #7a9a2f;
+        font-size: 22px;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 20px;
     }
 
-    .register-subheader {
-        font-weight: 500;
-        color: #4caf50;
-        margin-bottom: 1.5rem;
+        .logo svg {
+            fill: #7a9a2f;
+            height: 24px;
+            width: 24px;
+        }
+
+    h2 {
+        font-weight: 700;
+        font-size: 26px;
+        color: #7a9a2f;
+        margin-bottom: 6px;
     }
 
-    a {
-        color: #2e7d32;
-        font-weight: 600;
+    p.description {
+        color: #7a9a2f;
+        font-weight: 400;
+        margin-top: 0;
+        margin-bottom: 20px;
+        font-size: 14px;
     }
 
-        a:hover {
-            text-decoration: underline;
+    label {
+        font-weight: 700;
+        font-size: 14px;
+        color: #6b3902;
+        margin-bottom: 5px;
+    }
+
+    .input-group,
+    .password-wrapper {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 15px;
+        position: relative;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+        border: 1.5px solid #7a9a9a;
+        padding: 8px 10px;
+        font-size: 14px;
+        border-radius: 3px;
+        outline: none;
+        width: 100%;
+    }
+
+    .password-wrapper input {
+        padding-right: 35px;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #7a9a2f;
+        font-size: 16px;
+        user-select: none;
+    }
+
+    /* Buttons */
+    .btn-register {
+        background-color: #7a9a2f;
+        color: white;
+        font-weight: 700;
+        border: none;
+        border-radius: 18px;
+        padding: 10px 26px;
+        cursor: pointer;
+        width: 130px;
+        margin-top: 10px;
+        margin-bottom: 15px;
+    }
+
+    .btn-login {
+        border: 2px solid #4881ec;
+        color: #4881ec;
+        font-weight: 700;
+        border-radius: 22px;
+        padding: 10px 26px;
+        cursor: pointer;
+        width: 130px;
+        background: transparent;
+    }
+
+        .btn-login:hover {
+            background: #4881ec;
+            color: white;
+        }
+
+    /* Right panel (illustration/logo) */
+    .right-panel {
+        width: 45%;
+        background-color: #f4f8ed;
+        padding: 40px 30px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .right-panel h1 {
+            font-weight: 500;
+            color: #7a9a2f;
+            font-size: 22px;
+            margin-bottom: 45px;
+        }
+
+        .right-panel img {
+            width: 250px;
+            height: 230px;
+            border: 1px solid #7a9a2f;
+            border-radius: 5px;
+            padding: 5px;
+            background: #7a9a2f;
+            object-fit: contain;
+            margin-bottom: 40px;
+        }
+
+        .right-panel p {
+            font-size: 12px;
+            color: #7a3f02;
         }
 </style>
 
-<div class="d-flex justify-content-center align-items-center min-vh-100">
-    <div class="register-card">
-        <h2 class="text-center register-header mb-3">Welcome to AgriBuy</h2>
-        <h4 class="text-center register-subheader mb-4">Create Your Account</h4>
+<div class="container">
+    <!-- Left Panel -->
+    <div class="left-panel">
+        <div class="logo">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M12 2C9 5 5 8 4 13c-1 6 6 9 7 9s6-2 7-9c-1-5-5-8-7-11z" />
+            </svg>
+            AGRIBUY
+        </div>
 
-        <form method="post">
-            <div class="form-group mb-3">
-                <label asp-for="Input.FirstName">First Name <span class="text-danger">*</span></label>
-                <input asp-for="Input.FirstName" class="form-control" />
+        <h2>Create Account</h2>
+        <p class="description">Join us and start using AgriBuy</p>
+
+        <form method="post" novalidate>
+            <div class="input-group">
+                <label asp-for="Input.FirstName">First Name</label>
+                <input asp-for="Input.FirstName" type="text" required />
                 <span asp-validation-for="Input.FirstName" class="text-danger"></span>
             </div>
 
-            <div class="form-group mb-3">
+            <div class="input-group">
                 <label asp-for="Input.LastName">Last Name</label>
-                <input asp-for="Input.LastName" class="form-control" />
+                <input asp-for="Input.LastName" type="text" />
                 <span asp-validation-for="Input.LastName" class="text-danger"></span>
             </div>
 
-            <div class="form-group mb-3">
+            <div class="input-group">
                 <label asp-for="Input.EmailAddress">Email</label>
-                <input asp-for="Input.EmailAddress" class="form-control" />
+                <input asp-for="Input.EmailAddress" type="email" required />
                 <span asp-validation-for="Input.EmailAddress" class="text-danger"></span>
             </div>
 
-            <div class="form-group mb-3">
+            <div class="password-wrapper">
                 <label asp-for="Input.Password">Password</label>
-                <input asp-for="Input.Password" type="password" class="form-control" />
+                <input asp-for="Input.Password" type="password" id="password" required />
+                <span class="toggle-password" onclick="togglePassword()" title="Show/Hide Password">👁</span>
                 <span asp-validation-for="Input.Password" class="text-danger"></span>
             </div>
 
-            <div class="form-group mb-3">
+            <div class="password-wrapper">
                 <label asp-for="Input.ConfirmPassword">Confirm Password</label>
-                <input asp-for="Input.ConfirmPassword" type="password" class="form-control" />
+                <input asp-for="Input.ConfirmPassword" type="password" id="confirmPassword" required />
+                <span class="toggle-password" onclick="toggleConfirmPassword()" title="Show/Hide Password">👁</span>
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
 
-            <button type="submit" class="btn btn-success w-100">Register</button>
-
-            <div class="text-center mt-3">
-                <a asp-area="Accounts" asp-page="/Login" class="btn btn-primary mx-2">Login Here</a>
-            </div>
+            <button type="submit" class="btn-register">Register</button><br />
+            <button type="button" onclick="location.href='@Url.Page("/Login", new { area = "Accounts" })'" class="btn-login">Log in</button>
         </form>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="right-panel">
+        <h1>Welcome to AgriBuy</h1>
+        <img src="~/images/logo.jpg" alt="Agribuy Logo" />
+        <p>Shop smart. Shop green.</p>
     </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        function togglePassword() {
+            const passInput = document.getElementById('password');
+            passInput.type = passInput.type === 'password' ? 'text' : 'password';
+        }
+        function toggleConfirmPassword() {
+            const passInput = document.getElementById('confirmPassword');
+            passInput.type = passInput.type === 'password' ? 'text' : 'password';
+        }
+    </script>
 }

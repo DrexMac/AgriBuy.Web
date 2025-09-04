@@ -1,0 +1,29 @@
+﻿@page
+@model AgriBuy.Web.Areas.Seller.Pages.Stores.CreateModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Create Store";
+}
+<h2>Create Store</h2>
+<hr />
+<div class="row shadow">
+    <div class="col-md-6">
+        <form method="post">
+            <div class="form-group">
+                <label asp-for="Input.Name" class="control-label"></label>
+                <input asp-for="Input.Name" class="form-control" />
+                <span asp-validation-for="Input.Name" class="text-danger"></span>
+            </div>
+            <div class="form-group mt-2">
+                <input type="submit" value="Create Store" class="btn btn-primary" />
+                <a class="btn btn-secondary" asp-page="Index">Back to Store List</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
