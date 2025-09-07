@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AgriBuy.EntityFramework.Migrations
 {
     /// <inheritdoc />
-    public partial class SeedWithValidUser : Migration
+    public partial class Innit : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -77,7 +77,8 @@ namespace AgriBuy.EntityFramework.Migrations
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     Name = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    UserId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
+                    UserId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    UserId1 = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci")
                 },
                 constraints: table =>
                 {
@@ -88,6 +89,11 @@ namespace AgriBuy.EntityFramework.Migrations
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Stores_Users_UserId1",
+                        column: x => x.UserId1,
+                        principalTable: "Users",
+                        principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -107,7 +113,9 @@ namespace AgriBuy.EntityFramework.Migrations
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsAvailable = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    StoreId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
+                    StoreId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    ImagePath = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
@@ -169,7 +177,8 @@ namespace AgriBuy.EntityFramework.Migrations
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     UserId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     ProductId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    Quantity = table.Column<int>(type: "int", nullable: false)
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    UserId1 = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci")
                 },
                 constraints: table =>
                 {
@@ -186,6 +195,11 @@ namespace AgriBuy.EntityFramework.Migrations
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ShoppingCarts_Users_UserId1",
+                        column: x => x.UserId1,
+                        principalTable: "Users",
+                        principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -221,17 +235,22 @@ namespace AgriBuy.EntityFramework.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.InsertData(
+                table: "Users",
+                columns: new[] { "Id", "EmailAddress", "FirstName", "IsActive", "IsDeleted", "LastName", "Password", "PasswordHash", "Points", "Role", "Username" },
+                values: new object[] { new Guid("00000000-0000-0000-0000-000000000001"), "owner@agribuy.com", "Agri", null, false, "Owner", null, null, 0, 0, null });
+
+            migrationBuilder.InsertData(
                 table: "Stores",
-                columns: new[] { "Id", "Name", "UserId" },
-                values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), "AgriBuy Store", new Guid("00000000-0000-0000-0000-000000000000") });
+                columns: new[] { "Id", "Name", "UserId", "UserId1" },
+                values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), "AgriBuy Store", new Guid("00000000-0000-0000-0000-000000000001"), null });
 
             migrationBuilder.InsertData(
                 table: "Products",
-                columns: new[] { "Id", "Description", "IsAvailable", "IsDeleted", "Name", "Quantity", "StoreId", "UnitOfMeasure", "UnitPrice", "UserId" },
+                columns: new[] { "Id", "Description", "ImagePath", "IsAvailable", "IsDeleted", "Name", "Quantity", "StoreId", "UnitOfMeasure", "UnitPrice", "UserId" },
                 values: new object[,]
                 {
-                    { new Guid("22222222-2222-2222-2222-222222222222"), null, false, false, "Organic Apples", 0, new Guid("11111111-1111-1111-1111-111111111111"), "Kg", 5.50m, new Guid("00000000-0000-0000-0000-000000000000") },
-                    { new Guid("33333333-3333-3333-3333-333333333333"), null, false, false, "Fresh Milk", 0, new Guid("11111111-1111-1111-1111-111111111111"), "L", 2.20m, new Guid("00000000-0000-0000-0000-000000000000") }
+                    { new Guid("22222222-2222-2222-2222-222222222222"), null, "", false, false, "Organic Apples", 0, new Guid("11111111-1111-1111-1111-111111111111"), "Kg", 5.50m, new Guid("00000000-0000-0000-0000-000000000000") },
+                    { new Guid("33333333-3333-3333-3333-333333333333"), null, "", false, false, "Fresh Milk", 0, new Guid("11111111-1111-1111-1111-111111111111"), "L", 2.20m, new Guid("00000000-0000-0000-0000-000000000000") }
                 });
 
             migrationBuilder.CreateIndex(
@@ -280,9 +299,20 @@ namespace AgriBuy.EntityFramework.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ShoppingCarts_UserId1",
+                table: "ShoppingCarts",
+                column: "UserId1",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Stores_UserId",
                 table: "Stores",
-                column: "UserId",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Stores_UserId1",
+                table: "Stores",
+                column: "UserId1",
                 unique: true);
 
             migrationBuilder.CreateIndex(

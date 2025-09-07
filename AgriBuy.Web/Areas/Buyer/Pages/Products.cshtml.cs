@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using AgriBuy.Contracts;
 using AgriBuy.Contracts.Dto;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -21,40 +21,48 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
 
         public IEnumerable<ProductDto> Products { get; set; } = new List<ProductDto>();
 
-        public async Task OnGetAsync()
+        [BindProperty]
+        public AddToCartVm AddToCartInput { get; set; } = new AddToCartVm();
+
+        public class AddToCartVm
         {
-            Products = (IEnumerable<ProductDto>)await _productService.GetAllAsync();
+            public Guid ProductId { get; set; }
+            public int Quantity { get; set; } = 1;
         }
 
-        public async Task<IActionResult> OnPostAddToCartAsync(Guid productId, int quantity)
+        public async Task OnGetAsync()
+        {
+            Products = await _productService.GetAllProductsAsync();
+        }
+
+        public async Task<IActionResult> OnPostAddToCartAsync()
         {
             var userIdStr = HttpContext.Session.GetString("UserId");
             if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
-            {
                 return RedirectToPage("/Accounts/Login");
-            }
 
-            var product = await _productService.GetByIdAsync(productId);
+            var product = await _productService.GetByIdAsync(AddToCartInput.ProductId);
             if (product == null)
             {
-                return NotFound();
+                ModelState.AddModelError("", "Product not found.");
+                await OnGetAsync();
+                return Page();
             }
-
-            var itemPrice = product.UnitPrice * quantity;
 
             var cartItem = new ShoppingCartDto
             {
-                Id = Guid.NewGuid(),
                 UserId = userId,
-                ProductId = productId,
+                ProductId = product.Id,
+                Quantity = AddToCartInput.Quantity,
                 UnitPrice = product.UnitPrice,
-                Quantity = quantity,
-                ItemPrice = itemPrice,
-                UnitOfMeasure = product.UnitOfMeasure
+                UnitOfMeasure = product.UnitOfMeasure,
+                ProductName = product.Name,
+                ImagePath = product.ImagePath,
+                ItemPrice = product.UnitPrice * AddToCartInput.Quantity
             };
 
             await _shoppingCartService.AddAsync(cartItem);
-            return RedirectToPage("/Buyer/ShoppingCart"); 
+            return RedirectToPage(); // Refresh page
         }
     }
 }

@@ -18,6 +18,7 @@ namespace AgriBuy.Contracts.Dto
         public int Quantity { get; set; }
         public bool IsAvailable { get; set; }
         public Guid UserId { get; set; }
+        public string? ImagePath { get; set; }
     }
 
 }

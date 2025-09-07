@@ -47,7 +47,7 @@ namespace AgriBuy.EntityFramework
             {
                 Id = storeId1,
                 Name = "AgriBuy Store",
-                UserId = userId1 // ✅ Corrected FK value
+                UserId = userId1 // ✅ Correct FK
             });
 
             modelBuilder.Entity<Product>().HasData(
@@ -69,7 +69,6 @@ namespace AgriBuy.EntityFramework
                 }
             );
         }
-
 
         private void ConfigureTableMappings(ModelBuilder modelBuilder)
         {
@@ -107,6 +106,13 @@ namespace AgriBuy.EntityFramework
                 .HasMany(s => s.Products)
                 .WithOne(p => p.Store)
                 .HasForeignKey(p => p.StoreId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // ✅ Explicit Store ↔ User relationship
+            modelBuilder.Entity<Store>()
+                .HasOne(s => s.User)
+                .WithMany(u => u.Stores)
+                .HasForeignKey(s => s.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ShoppingCart>()

@@ -1,29 +1,130 @@
 ﻿@page
 @model AgriBuy.Web.Areas.Buyer.Pages.ProductsModel
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
-
 @{
-    ViewData["Title"] = "Available Products";
+    ViewData["Title"] = "Products";
 }
 
-<div class="container mt-5">
-    <h2>Available Products</h2>
-    <div class="row">
-        @foreach (var product in Model.Products)
-        {
-            <div class="col-md-4 mb-4">
-                <div class="card shadow-sm p-3">
-                    <h5>@product.Name</h5>
-                    <p><strong>UnitPrice:</strong> RM @product.UnitPrice.ToString("N2")</p>
-                    <p><strong>Unit:</strong> @product.UnitOfMeasure</p>
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: url('/images/loginbg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        display: flex;
+        justify-content: center;
+        padding: 40px 0;
+    }
 
-                    <form method="post" asp-page-handler="AddToCart">
-                        <input type="hidden" name="productId" value="@product.Id" />
-                        <input type="number" name="quantity" value="1" min="1" class="form-control mb-2" />
-                        <button type="submit" class="btn btn-success w-100">Add to Cart</button>
+    .products-container {
+        width: 1000px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+    }
+
+    .product-card {
+        background-color: rgba(244, 248, 237, 0.95);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        backdrop-filter: blur(5px);
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+        .product-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .product-card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2e7d32;
+            margin: 10px 0 5px 0;
+        }
+
+        .product-card p {
+            margin: 0;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .product-card .price {
+            font-weight: 700;
+            color: #2e7d32;
+            margin: 8px 0;
+        }
+
+        .product-card form button {
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+            .product-card form button:hover {
+                background-color: #27632a;
+            }
+
+    a.back-link {
+        display: inline-flex;
+        align-items: center;
+        background-color: #2e7d32;
+        color: white;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        text-decoration: none;
+        margin-bottom: 20px;
+        transition: background-color 0.2s;
+    }
+
+        a.back-link:hover {
+            background-color: #27632a;
+            text-decoration: none;
+        }
+
+        a.back-link i {
+            margin-right: 0.5rem;
+        }
+</style>
+
+<div class="container">
+    <a asp-page="/Landing" class="back-link"><i class="bi bi-arrow-left"></i> Back to Home</a>
+
+    @if (!Model.Products.Any())
+    {
+        <div class="empty-message">No products available.</div>
+    }
+    else
+    {
+        <div class="products-container">
+            @foreach (var p in Model.Products)
+            {
+                <div class="product-card">
+                    <img src="@Url.Content(p.ImagePath ?? "~/images/placeholder.png")" alt="@p.Name" />
+                    <h3>@p.Name</h3>
+                    <p>@p.UnitOfMeasure</p>
+                    <div class="price">₱ @p.UnitPrice.ToString("N2")</div>
+
+                    <form method="post" asp-page-handler="AddToCartAsync">
+                        <input type="hidden" asp-for="AddToCartInput.ProductId" value="@p.Id" />
+                        <input type="number" asp-for="AddToCartInput.Quantity" value="1" min="1" style="width:60px; margin-bottom:8px;" />
+                        <button type="submit">Add to Cart</button>
                     </form>
                 </div>
-            </div>
-        }
-    </div>
+            }
+        </div>
+    }
 </div>

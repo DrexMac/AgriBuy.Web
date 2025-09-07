@@ -19,5 +19,8 @@ namespace AgriBuy.Models.Models
         public ICollection<Order> Orders { get; set; } = new List<Order>();
         public string? PasswordHash { get; set; }
         public Store? Store { get; set; }
+        public ShoppingCart? ShoppingCart { get; set; }
+
+        public ICollection<Store>? Stores { get; set; }
     }
 }

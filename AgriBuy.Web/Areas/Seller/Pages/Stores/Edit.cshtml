@@ -6,26 +6,111 @@
     ViewData["Title"] = "Edit Store";
 }
 
-<div class="container mt-5">
-    <h1 class="display-4 text-center">Edit Store</h1>
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: url('/images/loginbg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        display: flex;
+        justify-content: center;
+        padding: 40px 0;
+    }
 
-    <form method="post">
-        <input type="hidden" asp-for="Store.Id" />
+    .details-card {
+        width: 700px;
+        background-color: rgba(244, 248, 237, 0.85);
+        padding: 30px 25px;
+        border-radius: 10px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        backdrop-filter: blur(5px);
+    }
 
-        <div class="mb-3">
-            <label asp-for="Store.Name" class="form-label">Store Name</label>
-            <input asp-for="Store.Name" class="form-control" required />
-            <span asp-validation-for="Store.Name" class="text-danger"></span>
+        .details-card h1 {
+            font-weight: 700;
+            font-size: 24px;
+            color: #7a9a2f;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+    .store-detail .input-group {
+        display: flex;
+        flex-direction: column;
+        text-align: left;
+        margin-bottom: 15px;
+    }
+
+    .store-detail label {
+        font-weight: 700;
+        color: #6b3902;
+        margin-bottom: 5px;
+    }
+
+    .store-detail input {
+        border: 1.5px solid #7a9a9a;
+        padding: 8px 10px;
+        font-size: 14px;
+        border-radius: 3px;
+        outline: none;
+        background-color: #f4f8ed;
+    }
+
+    .store-actions .btn {
+        margin-right: 0.5rem;
+        margin-top: 5px;
+    }
+
+    a.back-link {
+        display: inline-block;
+        margin-top: 15px;
+        color: #2e7d32;
+        font-weight: 600;
+        font-size: 14px;
+        text-decoration: none;
+        padding: 6px 12px;
+        border: 1.5px solid #2e7d32;
+        border-radius: 12px;
+        transition: 0.3s;
+    }
+
+        a.back-link:hover {
+            background: #2e7d32;
+            color: white;
+        }
+</style>
+
+<div class="details-card">
+    <h1>Edit Store</h1>
+
+    @if (Model.Store == null)
+    {
+        <h2>No record found</h2>
+    }
+    else
+    {
+        <div class="store-detail">
+            <form method="post">
+                <input type="hidden" asp-for="Store.Id" />
+
+                <div class="input-group">
+                    <label asp-for="Store.Name">Store Name</label>
+                    <input asp-for="Store.Name" class="form-control" required />
+                    <span asp-validation-for="Store.Name" class="text-danger"></span>
+                </div>
+
+                <div class="input-group">
+                    <label asp-for="Store.UserId">Owner/User Id</label>
+                    <input asp-for="Store.UserId" class="form-control" readonly />
+                </div>
+
+                <div class="store-actions">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a asp-page="Index" class="btn btn-secondary">Back to Store List</a>
+                </div>
+            </form>
         </div>
-
-        <div class="mb-3">
-            <label asp-for="Store.UserId" class="form-label">Owner/User Id</label>
-            <input asp-for="Store.UserId" class="form-control" readonly />
-        </div>
-
-        <button type="submit" class="btn btn-primary">Save Changes</button>
-        <a asp-page="Index" class="btn btn-secondary">Back to List</a>
-    </form>
+    }
 </div>
 
 @section Scripts {

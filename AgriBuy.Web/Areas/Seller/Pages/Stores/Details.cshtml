@@ -6,8 +6,94 @@
     ViewData["Title"] = "Store Details";
 }
 
-<div class="container mt-5">
-    <h1 class="display-4 text-center">Store Details</h1>
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: url('/images/loginbg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        display: flex;
+        justify-content: center;
+        padding: 40px 0;
+    }
+
+    .details-card {
+        width: 700px;
+        background-color: rgba(244, 248, 237, 0.85);
+        padding: 30px 25px;
+        border-radius: 10px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        backdrop-filter: blur(5px);
+    }
+
+        .details-card h1 {
+            font-weight: 700;
+            font-size: 24px;
+            color: #7a9a2f;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+    .store-detail .input-group {
+        display: flex;
+        flex-direction: column;
+        text-align: left;
+        margin-bottom: 15px;
+    }
+
+    .store-detail label {
+        font-weight: 700;
+        color: #6b3902;
+        margin-bottom: 5px;
+    }
+
+    .store-detail input {
+        border: 1.5px solid #7a9a9a;
+        padding: 8px 10px;
+        font-size: 14px;
+        border-radius: 3px;
+        outline: none;
+        background-color: #f4f8ed;
+    }
+
+    .store-actions .btn {
+        margin-right: 0.5rem;
+        margin-top: 5px;
+    }
+
+    .products-table th, .products-table td {
+        vertical-align: middle;
+    }
+
+    .product-thumb {
+        width: 90px;
+        height: 70px;
+        object-fit: cover;
+        border-radius: 6px;
+        border: 1px solid #e6e6e6;
+    }
+
+    a.back-link {
+        display: inline-block;
+        margin-top: 15px;
+        color: #2e7d32;
+        font-weight: 600;
+        font-size: 14px;
+        text-decoration: none;
+        padding: 6px 12px;
+        border: 1.5px solid #2e7d32;
+        border-radius: 12px;
+        transition: 0.3s;
+    }
+
+        a.back-link:hover {
+            background: #2e7d32;
+            color: white;
+        }
+</style>
+
+<div class="details-card">
+    <h1>Store Details</h1>
 
     @if (Model.Store == null)
     {
@@ -15,15 +101,67 @@
     }
     else
     {
-        <dl class="row">
-            <dt class="col-sm-3">Store Name</dt>
-            <dd class="col-sm-9">@Model.Store.Name</dd>
+        <div class="store-detail">
+            <div class="input-group">
+                <label>Store Name</label>
+                <input type="text" value="@Model.Store.Name" readonly />
+            </div>
 
-            <dt class="col-sm-3">Owner/User Id</dt>
-            <dd class="col-sm-9">@Model.Store.UserId</dd>
-        </dl>
-        <a asp-page="Edit" asp-route-storeid="@Model.Store.Id" class="btn btn-primary">Edit</a>
-        <a asp-page="Delete" asp-route-storeid="@Model.Store.Id" class="btn btn-danger">Delete</a>
-        <a asp-page="Index" class="btn btn-secondary">Back to List</a>
+            <div class="input-group">
+                <label>Owner/User Id</label>
+                <input type="text" value="@Model.Store.UserId" readonly />
+            </div>
+        </div>
+
+        <div class="store-actions mb-3">
+            <a asp-page="Edit" asp-route-storeid="@Model.Store.Id" class="btn btn-primary">Edit</a>
+            <a asp-page="Delete" asp-route-storeid="@Model.Store.Id" class="btn btn-danger">Delete</a>
+            <a asp-area="Seller" asp-page="/Products/Create" asp-route-storeid="@Model.Store.Id" class="btn btn-success">Add Product</a>
+        </div>
+
+        <hr />
+
+        <h3>Products in this store</h3>
+
+        @if (Model.Store.Products == null || !Model.Store.Products.Any())
+        {
+            <div class="alert alert-info">No products found for this store.</div>
+        }
+        else
+        {
+            <table class="table products-table">
+                <thead class="table-light">
+                    <tr>
+                        <th>Image</th>
+                        <th>Name</th>
+                        <th>Unit</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model.Store.Products.OrderBy(x => x.Name))
+                    {
+                        <tr>
+                            <td>
+                                <img src="@Url.Content(p.ImagePath ?? "~/images/placeholder.png")" alt="@p.Name" class="product-thumb" />
+                            </td>
+                            <td>@p.Name</td>
+                            <td>@p.UnitOfMeasure</td>
+                            <td>₱ @p.UnitPrice.ToString("N2")</td>
+                            <td>@p.Quantity</td>
+                            <td>
+                                
+                                <a asp-area="Seller" asp-page="/Products/Edit" asp-route-itemid="@p.Id" class="btn btn-sm btn-primary">Edit</a>
+                                <a asp-area="Seller" asp-page="/Products/Delete" asp-route-itemid="@p.Id" class="btn btn-sm btn-danger">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
     }
+
+    <a asp-area="Seller" asp-page="/Stores/Index" class="back-link">← Back to Stores List</a>
 </div>

@@ -1,54 +1,71 @@
 ﻿@page
 @model AgriBuy.Web.Areas.Buyer.Pages.ShoppingCartModel
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
 @{
     ViewData["Title"] = "Shopping Cart";
 }
 
 <style>
-    body, html {
-        height: 100%;
-        background: linear-gradient(135deg, #81c784 0%, #388e3c 100%);
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: url('/images/loginbg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        display: flex;
+        justify-content: center;
+        padding: 40px 0;
     }
 
     .cart-card {
-        width: 700px;
+        width: 900px;
+        background-color: rgba(244, 248, 237, 0.95);
+        padding: 30px 25px;
         border-radius: 10px;
         box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        background: white;
-        padding: 2rem;
+        backdrop-filter: blur(5px);
     }
 
     .cart-header {
         font-weight: 700;
-        color: #2e7d32;
-        margin-bottom: 1rem;
+        font-size: 24px;
+        color: #7a9a2f;
         text-align: center;
+        margin-bottom: 20px;
     }
+
+    a.back-link {
+        display: inline-flex;
+        align-items: center;
+        background-color: #2e7d32;
+        color: white;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        text-decoration: none;
+        margin-bottom: 1rem;
+        transition: background-color 0.2s;
+    }
+
+        a.back-link:hover {
+            background-color: #27632a;
+            text-decoration: none;
+        }
+
+        a.back-link i {
+            margin-right: 0.5rem;
+        }
 
     .table thead {
         background-color: #a5d6a7;
         color: #1b5e20;
     }
 
-    a.back-link {
-        color: #2e7d32;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-block;
-        margin-top: 1.5rem;
-    }
-
-        a.back-link:hover {
-            text-decoration: underline;
-        }
-
-    .empty-message {
-        text-align: center;
-        color: #558b2f;
-        font-weight: 600;
-        margin: 2rem 0;
+    .product-img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 6px;
     }
 
     .order-total {
@@ -59,82 +76,107 @@
         margin-top: 1rem;
     }
 
-    .checkout-btn, .addorder-btn {
+    .checkout-btn {
+        background-color: #2e7d32;
         color: white;
         border: none;
         padding: 0.75rem 1.5rem;
         font-weight: 600;
         border-radius: 6px;
         cursor: pointer;
-        float: right;
-        margin-top: 1rem;
-        margin-left: 0.5rem;
-    }
-
-    .checkout-btn {
-        background-color: #2e7d32;
     }
 
         .checkout-btn:hover {
             background-color: #27632a;
         }
 
-    .addorder-btn {
-        background-color: #4caf50;
+    .clear-btn {
+        background-color: wheat;
+        color: black;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        border-radius: 6px;
+        cursor: pointer;
     }
 
-        .addorder-btn:hover {
-            background-color: #388e3c;
+        .clear-btn:hover {
+            background-color: white;
         }
+
+    .empty-message {
+        text-align: center;
+        color: #558b2f;
+        font-weight: 600;
+        margin: 2rem 0;
+    }
+
+    .cart-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1rem;
+    }
 </style>
 
-<div class="d-flex justify-content-center align-items-center min-vh-100">
-    <div class="cart-card">
-        <h2 class="cart-header"><i class="bi bi-cart4"></i> Your Shopping Cart</h2>
+<div class="cart-card">
+    <h2 class="cart-header">🛒 My Shopping Cart</h2>
 
-        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-        {
-            <div class="empty-message">@Model.ErrorMessage</div>
-        }
-        else
-        {
-            <table class="table table-striped table-bordered align-middle">
-                <thead>
+    <a asp-page="/Landing" class="back-link">
+        <i class="bi bi-arrow-left"></i> Continue Shopping
+    </a>
+
+    @if (!Model.CartItems.Any())
+    {
+        <div class="empty-message">Your cart is empty.</div>
+    }
+    else
+    {
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Unit</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Total</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.CartItems)
+                {
                     <tr>
-                        <th>Product ID</th>
-                        <th>Unit</th>
-                        <th>Unit UnitPrice (RM)</th>
-                        <th>Quantity</th>
-                        <th>Item UnitPrice (RM)</th>
+                        <td>
+                            <img src="@Url.Content(item.ImagePath ?? "~/images/placeholder.png")"
+                                 alt="@item.ProductName" class="product-img" />
+                            <br />@item.ProductName
+                        </td>
+                        <td>@item.UnitOfMeasure</td>
+                        <td>@item.Quantity</td>
+                        <td>₱ @(item.UnitPrice.ToString("N2"))</td>
+                        <td>₱ @((item.UnitPrice * item.Quantity).ToString("N2"))</td>
+                        <td>
+                            <form method="post" asp-page-handler="Remove" asp-route-id="@item.Id">
+                                <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                            </form>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model.CartItems)
-                    {
-                        <tr>
-                            <td>@item.ProductId</td>
-                            <td>@item.UnitOfMeasure</td>
-                            <td>@item.UnitPrice.ToString("N2")</td>
-                            <td>@item.Quantity</td>
-                            <td>@item.ItemPrice.ToString("N2")</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                }
+            </tbody>
+        </table>
 
-            <div class="order-total">
-                Total: RM @Model.OrderTotal.ToString("N2")
-            </div>
+        <div class="order-total">
+            Total: ₱ @(Model.CartItems.Sum(x => x.UnitPrice * x.Quantity).ToString("N2"))
+        </div>
 
-            <form method="post" style="display:inline-block;">
-                <button type="submit" class="checkout-btn" asp-page-handler="Checkout">Checkout</button>
+        <div class="cart-actions">
+            <form method="post" asp-page-handler="Clear" style="display:inline;">
+                <button type="submit" class="clear-btn">Clear Cart</button>
             </form>
 
-            <form method="post" asp-page-handler="AddOrder" style="display:inline-block;">
-                <button type="submit" class="addorder-btn">Add Order</button>
+            <form method="post" asp-page-handler="Checkout" style="display:inline;">
+                <button type="submit" class="checkout-btn">Proceed to Checkout</button>
             </form>
-        }
-
-        <a asp-page="/Landing" class="back-link">← Back to Dashboard</a>
-    </div>
+        </div>
+    }
 </div>

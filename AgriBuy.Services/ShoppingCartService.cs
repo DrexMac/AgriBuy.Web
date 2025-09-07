@@ -5,6 +5,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace AgriBuy.Services
@@ -22,7 +23,11 @@ namespace AgriBuy.Services
 
         public async Task<IEnumerable<ShoppingCartDto>> GetByUserIdAsync(Guid userId)
         {
-            var entities = await _repository.Find(x => x.UserId == userId).ToListAsync();
+            // Include Product to get seller info
+            var entities = await _repository.Find(x => x.UserId == userId)
+                                            .Include(x => x.Product)
+                                            .AsNoTracking()
+                                            .ToListAsync();
             return _mapper.Map<IEnumerable<ShoppingCartDto>>(entities);
         }
 
@@ -35,9 +40,13 @@ namespace AgriBuy.Services
 
         public async Task UpdateAsync(ShoppingCartDto model)
         {
-            var entity = _mapper.Map<ShoppingCart>(model);
-            _repository.Update(entity);
-            await _repository.SaveChangesAsync();
+            // Fetch existing entity to avoid EF tracking conflict
+            var entity = await _repository.Find(x => x.Id == model.Id).FirstOrDefaultAsync();
+            if (entity != null)
+            {
+                entity.Quantity = model.Quantity;
+                await _repository.SaveChangesAsync();
+            }
         }
 
         public async Task DeleteAsync(Guid id)
@@ -52,10 +61,12 @@ namespace AgriBuy.Services
 
         public async Task ClearCartAsync(Guid userId)
         {
-            var items = _repository.Find(x => x.UserId == userId);
-            _repository.Delete(items.ToArray());
-            await _repository.SaveChangesAsync();
+            var items = await _repository.Find(x => x.UserId == userId).ToListAsync();
+            if (items.Any())
+            {
+                _repository.Delete(items.ToArray());
+                await _repository.SaveChangesAsync();
+            }
         }
     }
 }
-

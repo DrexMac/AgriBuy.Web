@@ -11,5 +11,7 @@ namespace AgriBuy.Contracts
     {
         Task<IEnumerable<ProductDto>> GetByUserIdAsync(Guid userId);
         Task AddAsync(ProductDto productDto, Guid userId);
+        Task UpdateAsync(ProductDto productDto);
+        Task<IEnumerable<ProductDto>> GetAllProductsAsync();
     }
 }

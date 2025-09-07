@@ -6,86 +6,174 @@
 }
 
 <style>
-    body, html {
-        height: 100%;
-        background: linear-gradient(135deg, #81c784 0%, #388e3c 100%);
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* Full-page background */
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        height: 100vh;
+        background: url('/images/loginbg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
     }
 
+    /* Semi-transparent overlay for entire page (optional if you want slight dim) */
+    
+
+    /* Centered card */
     .update-card {
-        width: 400px;
+        position: relative;
+        z-index: 1;
+        width: 420px;
+        background-color: rgba(244, 248, 237, 0.85); /* semi-transparent light green */
+        padding: 40px 30px;
         border-radius: 10px;
         box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        background: white;
-        padding: 2rem;
+        text-align: center;
+        backdrop-filter: blur(5px); /* optional blur for frosted effect */
     }
 
-    .update-header {
-        font-weight: 700;
-        color: #2e7d32;
+    /* Logo */
+    .logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        margin-bottom: 20px;
     }
 
-    .update-subheader {
-        font-weight: 500;
-        color: #4caf50;
-        margin-bottom: 1.5rem;
-    }
-
-    a {
-        color: #2e7d32;
-        font-weight: 600;
-    }
-
-    a:hover {
-        text-decoration: underline;
-    }
-
-    .form-check-label {
-        user-select: none;
-    }
-</style>
-
-<div class="d-flex justify-content-center align-items-center min-vh-100">
-    <div class="update-card">
-        <h2 class="text-center update-header mb-3">Update Your Profile</h2>
-        <h4 class="text-center update-subheader mb-4">Manage your account details</h4>
-
-        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-        {
-            <div class="alert alert-danger">@Model.ErrorMessage</div>
+        .logo img {
+            width: 40px;
+            height: auto;
         }
 
-        <form method="post" novalidate>
-            <div class="form-group mb-3">
-                <label asp-for="Input.FirstName" class="form-label">First Name <span class="text-danger">*</span></label>
-                <input asp-for="Input.FirstName" class="form-control" />
-                <span asp-validation-for="Input.FirstName" class="text-danger"></span>
-            </div>
+        .logo span {
+            font-weight: 700;
+            color: #7a9a2f;
+            font-size: 22px;
+        }
 
-            <div class="form-group mb-3">
-                <label asp-for="Input.LastName" class="form-label">Last Name <span class="text-danger">*</span></label>
-                <input asp-for="Input.LastName" class="form-control" />
-                <span asp-validation-for="Input.LastName" class="text-danger"></span>
-            </div>
+    h2 {
+        font-weight: 700;
+        font-size: 24px;
+        color: #7a9a2f;
+        margin-bottom: 6px;
+    }
 
-            <div class="form-group mb-3">
-                <label asp-for="Input.EmailAddress" class="form-label">Email Address <span class="text-danger">*</span></label>
-                <input asp-for="Input.EmailAddress" class="form-control" />
-                <span asp-validation-for="Input.EmailAddress" class="text-danger"></span>
-            </div>
+    p.description {
+        color: #7a9a2f;
+        font-weight: 400;
+        margin-top: 0;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
 
-            <div class="form-group mb-4">
-                <label asp-for="Input.Role" class="form-label">Role <span class="text-danger">*</span></label>
-                <select asp-for="Input.Role" class="form-control">
-                    <option value="Buyer">Buyer</option>
-                    <option value="Seller">Seller</option>
-                </select>
-                <span asp-validation-for="Input.Role" class="text-danger"></span>
-            </div>
+    label {
+        font-weight: 700;
+        font-size: 14px;
+        color: #6b3902;
+        margin-bottom: 5px;
+        text-align: left;
+    }
 
-            <button type="submit" class="btn btn-success w-100">Update Profile</button>
-        </form>
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 15px;
+        text-align: left;
+    }
+
+    input, select {
+        border: 1.5px solid #7a9a9a;
+        padding: 8px 10px;
+        font-size: 14px;
+        border-radius: 3px;
+        outline: none;
+        width: 100%;
+    }
+
+    /* Buttons */
+    .btn-update {
+        background-color: #7a9a2f;
+        color: white;
+        font-weight: 700;
+        border: none;
+        border-radius: 18px;
+        padding: 10px 26px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    /* Back to Dashboard link styled as button */
+    .back-link {
+        display: inline-block;
+        margin-top: 12px;
+        color: #2e7d32;
+        font-weight: 600;
+        font-size: 14px;
+        text-decoration: none;
+        padding: 6px 12px;
+        border: 1.5px solid #2e7d32;
+        border-radius: 12px;
+        transition: 0.3s;
+    }
+
+        .back-link:hover {
+            background: #2e7d32;
+            color: white;
+        }
+</style>
+
+<div class="overlay"></div>
+
+<div class="update-card">
+    <div class="logo">
+        <img src="~/images/DrexReynes.jpg" alt="AgriBuy Logo" />
+        <span>AGRIBUY</span>
     </div>
+
+    <h2>Update Profile</h2>
+    <p class="description">Manage your account details</p>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">@Model.ErrorMessage</div>
+    }
+
+    <form method="post" novalidate>
+        <div class="input-group">
+            <label asp-for="Input.FirstName">First Name</label>
+            <input asp-for="Input.FirstName" type="text" required />
+            <span asp-validation-for="Input.FirstName" class="text-danger"></span>
+        </div>
+
+        <div class="input-group">
+            <label asp-for="Input.LastName">Last Name</label>
+            <input asp-for="Input.LastName" type="text" required />
+            <span asp-validation-for="Input.LastName" class="text-danger"></span>
+        </div>
+
+        <div class="input-group">
+            <label asp-for="Input.EmailAddress">Email Address</label>
+            <input asp-for="Input.EmailAddress" type="email" required />
+            <span asp-validation-for="Input.EmailAddress" class="text-danger"></span>
+        </div>
+
+        <div class="input-group">
+            <label asp-for="Input.Role">Role</label>
+            <select asp-for="Input.Role">
+                <option value="Buyer">Buyer</option>
+                <option value="Seller">Seller</option>
+            </select>
+            <span asp-validation-for="Input.Role" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn-update">Update</button>
+        <a asp-page="/Landing" class="back-link">← Back to Dashboard</a>
+    </form>
 </div>
 
 @section Scripts {

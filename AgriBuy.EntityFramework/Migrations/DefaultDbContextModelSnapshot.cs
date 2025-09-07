@@ -143,6 +143,10 @@ namespace AgriBuy.EntityFramework.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
 
+                    b.Property<string>("ImagePath")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("tinyint(1)");
 
@@ -180,6 +184,7 @@ namespace AgriBuy.EntityFramework.Migrations
                         new
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
+                            ImagePath = "",
                             IsAvailable = false,
                             IsDeleted = false,
                             Name = "Organic Apples",
@@ -192,6 +197,7 @@ namespace AgriBuy.EntityFramework.Migrations
                         new
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
+                            ImagePath = "",
                             IsAvailable = false,
                             IsDeleted = false,
                             Name = "Fresh Milk",
@@ -218,11 +224,17 @@ namespace AgriBuy.EntityFramework.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("char(36)");
 
+                    b.Property<Guid?>("UserId1")
+                        .HasColumnType("char(36)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ProductId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1")
+                        .IsUnique();
 
                     b.ToTable("ShoppingCarts", (string)null);
                 });
@@ -241,9 +253,14 @@ namespace AgriBuy.EntityFramework.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("char(36)");
 
+                    b.Property<Guid?>("UserId1")
+                        .HasColumnType("char(36)");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId")
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1")
                         .IsUnique();
 
                     b.ToTable("Stores", (string)null);
@@ -253,7 +270,7 @@ namespace AgriBuy.EntityFramework.Migrations
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
                             Name = "AgriBuy Store",
-                            UserId = new Guid("00000000-0000-0000-0000-000000000000")
+                            UserId = new Guid("00000000-0000-0000-0000-000000000001")
                         });
                 });
 
@@ -305,6 +322,18 @@ namespace AgriBuy.EntityFramework.Migrations
                         .IsUnique();
 
                     b.ToTable("Users", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000001"),
+                            EmailAddress = "owner@agribuy.com",
+                            FirstName = "Agri",
+                            IsDeleted = false,
+                            LastName = "Owner",
+                            Points = 0,
+                            Role = 0
+                        });
                 });
 
             modelBuilder.Entity("AgriBuy.Models.Models.LoginInfo", b =>
@@ -384,6 +413,10 @@ namespace AgriBuy.EntityFramework.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("AgriBuy.Models.Models.User", null)
+                        .WithOne("ShoppingCart")
+                        .HasForeignKey("AgriBuy.Models.Models.ShoppingCart", "UserId1");
+
                     b.Navigation("Product");
 
                     b.Navigation("User");
@@ -391,11 +424,17 @@ namespace AgriBuy.EntityFramework.Migrations
 
             modelBuilder.Entity("AgriBuy.Models.Models.Store", b =>
                 {
-                    b.HasOne("AgriBuy.Models.Models.User", null)
-                        .WithOne("Store")
-                        .HasForeignKey("AgriBuy.Models.Models.Store", "UserId")
+                    b.HasOne("AgriBuy.Models.Models.User", "User")
+                        .WithMany("Stores")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("AgriBuy.Models.Models.User", null)
+                        .WithOne("Store")
+                        .HasForeignKey("AgriBuy.Models.Models.Store", "UserId1");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("AgriBuy.Models.Models.Order", b =>
@@ -419,7 +458,11 @@ namespace AgriBuy.EntityFramework.Migrations
 
                     b.Navigation("Orders");
 
+                    b.Navigation("ShoppingCart");
+
                     b.Navigation("Store");
+
+                    b.Navigation("Stores");
                 });
 #pragma warning restore 612, 618
         }

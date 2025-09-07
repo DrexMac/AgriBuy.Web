@@ -24,15 +24,15 @@ namespace AgriBuy.Services
             _mapper = mapper;
         }
 
-        // IService<Product> implementation
+        // --- IService<Product> implementation (Seller CRUD)
         public async Task<IEnumerable<Product>> GetAllAsync()
         {
-            return await _repository.All().ToListAsync();
+            return await _repository.All().Include(p => p.Store).ToListAsync();
         }
 
         public async Task<Product?> GetByIdAsync(Guid id)
         {
-            return await _repository.Find(x => x.Id == id).FirstOrDefaultAsync();
+            return await _repository.Find(x => x.Id == id).Include(p => p.Store).FirstOrDefaultAsync();
         }
 
         public async Task AddAsync(Product entity)
@@ -58,9 +58,7 @@ namespace AgriBuy.Services
             }
         }
 
-        // IProductService-specific methods
-        
-
+        // --- IProductService specific methods ---
         public async Task<IEnumerable<ProductDto>> GetByUserIdAsync(Guid userId)
         {
             var entities = await _repository
@@ -71,18 +69,16 @@ namespace AgriBuy.Services
             return _mapper.Map<IEnumerable<ProductDto>>(entities);
         }
 
-       
         public async Task AddAsync(ProductDto productDto, Guid userId)
         {
             var store = await _context.Stores.FirstOrDefaultAsync(s => s.UserId == userId);
-
             if (store == null)
             {
                 store = new Store
                 {
                     Id = Guid.NewGuid(),
                     UserId = userId,
-                    Name = "My Store",
+                    Name = "My Store"
                 };
                 await _context.Stores.AddAsync(store);
                 await _context.SaveChangesAsync();
@@ -92,8 +88,6 @@ namespace AgriBuy.Services
             entity.Id = Guid.NewGuid();
             entity.StoreId = store.Id;
             entity.UserId = userId;
-            entity.IsAvailable = productDto.IsAvailable;
-            entity.Description = productDto.Description;
 
             await _context.Products.AddAsync(entity);
             await _context.SaveChangesAsync();
@@ -106,6 +100,11 @@ namespace AgriBuy.Services
             await _repository.SaveChangesAsync();
         }
 
-        
+        // --- Buyer pages ---
+        public async Task<IEnumerable<ProductDto>> GetAllProductsAsync()
+        {
+            var products = await _repository.All().Include(p => p.Store).ToListAsync();
+            return _mapper.Map<IEnumerable<ProductDto>>(products);
+        }
     }
 }

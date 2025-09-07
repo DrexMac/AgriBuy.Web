@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Threading.Tasks;
@@ -7,13 +6,13 @@ namespace AgriBuy.Web.Areas.Accounts.Pages
 {
     public class LogoutModel : PageModel
     {
-        public async Task<IActionResult> OnGetAsync()
+        public IActionResult OnGet()
         {
-            // Sign out the user
-            await HttpContext.SignOutAsync();
+            // Clear the session values set during login
+            HttpContext.Session.Clear();
 
-            // Redirect to home page after logout
-            return RedirectToPage("/Index");
+            // Redirect to login page after logout
+            return RedirectToPage("/Login", new { area = "Accounts" });
         }
     }
 }

@@ -62,7 +62,10 @@
     <div class="create-card">
         <h2 class="create-header"><i class="bi bi-plus-circle"></i> Add New Product</h2>
 
+        <!-- Hidden storeid so if the user came from a store page, it is posted back -->
         <form method="post" enctype="multipart/form-data">
+            <input asp-for="StoreId" type="hidden" />
+
             <div class="form-group">
                 <label asp-for="Input.Name"></label>
                 <input asp-for="Input.Name" class="form-control" />
