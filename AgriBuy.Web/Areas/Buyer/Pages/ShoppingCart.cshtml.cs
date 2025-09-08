@@ -28,9 +28,15 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
                 return RedirectToPage("/Accounts/Login");
 
             CartItems = (await _shoppingCartService.GetByUserIdAsync(userId)).ToList();
-
             OrderTotal = CartItems.Sum(x => x.ItemPrice);
             return Page();
+        }
+
+        // Fixed Remove: only deletes the specific item
+        public async Task<IActionResult> OnPostRemoveAsync(Guid cartItemId)
+        {
+            await _shoppingCartService.DeleteAsync(cartItemId);
+            return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostIncreaseAsync(Guid cartItemId)
@@ -59,12 +65,6 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
                     await _shoppingCartService.UpdateAsync(item);
                 }
             }
-            return RedirectToPage();
-        }
-
-        public async Task<IActionResult> OnPostDeleteAsync(Guid cartItemId)
-        {
-            await _shoppingCartService.DeleteAsync(cartItemId);
             return RedirectToPage();
         }
 

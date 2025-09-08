@@ -44,7 +44,7 @@ namespace AgriBuy.Web.Areas.Accounts.Pages
                 }, Input.Password);
 
                 // Redirect to a success page or login page
-                return RedirectToPage("/Index");
+                return RedirectToPage("/Login", new { area = "Accounts" });
             }
             catch (Exception ex)
             {

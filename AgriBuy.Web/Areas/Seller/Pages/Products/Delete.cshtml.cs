@@ -43,15 +43,22 @@ namespace AgriBuy.Web.Areas.Seller.Pages.Products
                 return NotFound();
             }
 
-            var product = await _context.Products.FindAsync(Item.Id);
+            // Load product including store info
+            var product = await _context.Products
+                .Include(p => p.Store)
+                .FirstOrDefaultAsync(p => p.Id == Item.Id);
+
             if (product == null)
             {
                 return NotFound();
             }
 
+            var storeId = product.StoreId;
+
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
-            return RedirectToPage("Index");
+
+            return RedirectToPage("/Stores/Details", new { area = "Seller", storeid = storeId });
         }
     }
 }

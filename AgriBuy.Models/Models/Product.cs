@@ -11,7 +11,7 @@ namespace AgriBuy.Models.Models
     {
         public Guid Id { get; set; }
 
-        // You store the owner user id on the product as well (keeps queries straightforward)
+        
         public Guid UserId { get; set; }
 
         [Required]

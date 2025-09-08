@@ -156,7 +156,7 @@
                         <td>₱ @(item.UnitPrice.ToString("N2"))</td>
                         <td>₱ @((item.UnitPrice * item.Quantity).ToString("N2"))</td>
                         <td>
-                            <form method="post" asp-page-handler="Remove" asp-route-id="@item.Id">
+                            <form method="post" asp-page-handler="Remove" asp-route-cartItemId="@item.Id">
                                 <button type="submit" class="btn btn-sm btn-danger">Remove</button>
                             </form>
                         </td>

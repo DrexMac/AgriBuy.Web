@@ -16,8 +16,6 @@ namespace AgriBuy.Web.Areas.Seller.Pages.Products
         }
 
         public Product Product { get; set; }
-
-        // Areas/Seller/Pages/Store/Create.cshtml.cs
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid || _context.Products == null || Product == null)
@@ -39,7 +37,7 @@ namespace AgriBuy.Web.Areas.Seller.Pages.Products
             }
 
             Product.Id = Guid.NewGuid();
-            Product.StoreId = store.Id; // <-- This is required!
+            Product.StoreId = store.Id; 
 
             _context.Products.Add(Product);
             await _context.SaveChangesAsync();
