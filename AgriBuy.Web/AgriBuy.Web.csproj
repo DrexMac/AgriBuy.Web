@@ -9,9 +9,13 @@
 
   <ItemGroup>
     <Compile Remove="Areas\Buyer\Pages\Order\**" />
+    <Compile Remove="wwwroot\images\products\**" />
     <Content Remove="Areas\Buyer\Pages\Order\**" />
+    <Content Remove="wwwroot\images\products\**" />
     <EmbeddedResource Remove="Areas\Buyer\Pages\Order\**" />
+    <EmbeddedResource Remove="wwwroot\images\products\**" />
     <None Remove="Areas\Buyer\Pages\Order\**" />
+    <None Remove="wwwroot\images\products\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,10 +35,6 @@
     <ProjectReference Include="..\AgriBuy.EntityFramework\AgriBuy.EntityFramework.csproj" />
     <ProjectReference Include="..\AgriBuy.MySql\AgriBuy.MySql.csproj" />
     <ProjectReference Include="..\AgriBuy.Services\AgriBuy.Services.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="wwwroot\images\products\" />
   </ItemGroup>
 
 </Project>
