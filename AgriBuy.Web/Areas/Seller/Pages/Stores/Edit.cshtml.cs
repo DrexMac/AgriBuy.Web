@@ -27,11 +27,15 @@ namespace AgriBuy.Web.Areas.Seller.Pages.Stores
                 return NotFound();
             }
 
-            Store = await _context.Stores.FindAsync(storeid.Value);
+            Store = await _context.Stores
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.Id == storeid.Value);
+
             if (Store == null)
             {
                 return NotFound();
             }
+
             return Page();
         }
 
@@ -44,7 +48,9 @@ namespace AgriBuy.Web.Areas.Seller.Pages.Stores
 
             _context.Stores.Update(Store);
             await _context.SaveChangesAsync();
-            return RedirectToPage("Index");
+
+            // Redirect to the details of the updated store
+            return RedirectToPage("/Stores/Details", new { area = "Seller", storeid = Store.Id });
         }
     }
 }

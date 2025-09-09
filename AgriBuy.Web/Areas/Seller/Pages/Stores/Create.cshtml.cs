@@ -56,8 +56,8 @@ namespace AgriBuy.Web.Areas.Seller.Pages.Stores
 
             await _storeService.AddAsync(Input);
 
-            // Redirect to product creation, passing StoreId
-            return RedirectToPage("/Products/Create", new { storeId = Input.Id });
+            
+            return RedirectToPage("/Stores/Details", new { area = "Seller", storeid = Input.Id });
         }
 
 

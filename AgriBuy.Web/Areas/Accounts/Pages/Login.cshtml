@@ -7,39 +7,38 @@
 
 <style>
     /* Body background */
+    /* Body background */
     body {
         margin: 0;
-        font-family: Arial, sans-serif;
-        display: flex;
-        height: 100vh;
+        height: 100%;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         background: url('/images/loginbg.jpg') no-repeat center center fixed;
         background-size: cover;
-        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     /* Container */
     .container {
-        position: relative;
-        z-index: 1;
-        width: 100%;
-        max-width: 1000px;
-        margin: auto;
         display: flex;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        border-radius: 8px;
+        width: 900px;
+        max-width: 95%;
+        border-radius: 12px;
         overflow: hidden;
+        box-shadow: 0 12px 30px rgba(0,0,0,0.25);
     }
 
-    /* Left Panel */
+    /* Left Panel - glass card */
     .left-panel {
-        background-color: rgba(255, 255, 255, 0.85); /* semi-transparent white */
-        padding: 40px 50px;
         width: 45%;
-        box-sizing: border-box;
+        background-color: rgba(255, 255, 255, 0.88);
+        padding: 2rem;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        backdrop-filter: blur(5px); /* optional blur */
+        backdrop-filter: blur(4px);
+        border-radius: 12px 0 0 12px; /* round only left corners */
     }
 
     /* Logo */
@@ -59,13 +58,12 @@
             width: 24px;
         }
 
-    /* Form */
+    /* Form elements */
     h2 {
         font-weight: 700;
         font-size: 28px;
         color: #7a9a2f;
-        margin-top: 15px;
-        margin-bottom: 3px;
+        margin-bottom: 1rem;
     }
 
     label {
@@ -75,26 +73,24 @@
         margin-bottom: 5px;
     }
 
-    .input-group,
-    .password-wrapper {
+    .input-group, .password-wrapper {
         display: flex;
         flex-direction: column;
         margin-bottom: 15px;
         position: relative;
     }
 
-    input[type="email"],
-    input[type="password"] {
+    input[type="email"], input[type="password"] {
         border: 1.5px solid #4881ec;
         padding: 8px 10px;
         font-size: 14px;
-        border-radius: 3px;
+        border-radius: 6px;
         outline: none;
         width: 100%;
     }
 
     .password-wrapper input {
-        padding-right: 35px; /* space for eye icon */
+        padding-right: 35px;
     }
 
     .toggle-password {
@@ -105,7 +101,6 @@
         cursor: pointer;
         color: #7a9a2f;
         font-size: 16px;
-        user-select: none;
     }
 
     /* Remember me */
@@ -129,7 +124,7 @@
         color: white;
         font-weight: 700;
         border: none;
-        border-radius: 18px;
+        border-radius: 8px;
         padding: 10px 26px;
         cursor: pointer;
         width: 120px;
@@ -140,7 +135,7 @@
         border: 2px solid #4881ec;
         color: #4881ec;
         font-weight: 700;
-        border-radius: 22px;
+        border-radius: 8px;
         padding: 10px 26px;
         cursor: pointer;
         width: 120px;
@@ -164,34 +159,36 @@
             font-weight: 700;
         }
 
-    /* Right Panel */
+    /* Right Panel - complementary glass card */
     .right-panel {
         width: 55%;
-        background-color: rgba(244, 248, 237, 0.85); /* semi-transparent light green */
-        padding: 40px 30px;
-        box-sizing: border-box;
+        background-color: rgba(244, 248, 237, 0.85);
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        backdrop-filter: blur(5px); /* optional blur */
+        backdrop-filter: blur(4px);
+        border-radius: 0 12px 12px 0; 
     }
 
+        
         .right-panel img {
             width: 250px;
             height: 230px;
+            border-radius: 8px;
             border: 1px solid #7a9a2f;
-            border-radius: 5px;
             padding: 5px;
-            background: #7a9a2f;
             object-fit: contain;
             margin-bottom: 40px;
+            mix-blend-mode: multiply;
         }
 
         .right-panel p {
             font-size: 12px;
             color: #7a3f02;
+            text-align: center;
         }
+
 </style>
 
 <div class="container">
@@ -247,7 +244,7 @@
     <!-- Right Panel -->
     <div class="right-panel">
         <h1></h1>
-        <img src="~/images/logo.jpg" alt="Agribuy Logo" />
+        <img src="~/images/remove the backgroun.png" alt="Agribuy Logo" />
         <p>Details</p>
     </div>
 </div>

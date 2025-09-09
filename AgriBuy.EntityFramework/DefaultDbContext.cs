@@ -28,13 +28,13 @@ namespace AgriBuy.EntityFramework
             ConfigureDecimalPrecision(modelBuilder);
             ConfigureStringLengthAndRequiredFields(modelBuilder);
 
-            // --- Fixed GUIDs for seed data ---
+            
             var userId1 = Guid.Parse("00000000-0000-0000-0000-000000000001");
             var storeId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
             var productId1 = Guid.Parse("22222222-2222-2222-2222-222222222222");
             var productId2 = Guid.Parse("33333333-3333-3333-3333-333333333333");
 
-            // ✅ Seed User to satisfy Store FK constraint
+            
             modelBuilder.Entity<User>().HasData(new User
             {
                 Id = userId1,
@@ -47,7 +47,7 @@ namespace AgriBuy.EntityFramework
             {
                 Id = storeId1,
                 Name = "AgriBuy Store",
-                UserId = userId1 // ✅ Correct FK
+                UserId = userId1 // FK 
             });
 
             modelBuilder.Entity<Product>().HasData(

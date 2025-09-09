@@ -3,30 +3,68 @@
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
 @{
-    ViewData["Title"] = "My Store List";
+    ViewData["Title"] = "My Store";
 }
 
 <style>
-    body, html {
-        height: 100%;
-        background: linear-gradient(135deg, #81c784 0%, #388e3c 100%);
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: url('/images/loginbg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        display: flex;
+        justify-content: center;
+        padding: 40px 0;
     }
 
-    .store-list-card {
-        width: 900px;
+    .details-card {
+        width: 820px;
+        background-color: rgba(244, 248, 237, 0.90);
+        padding: 20px 30px;
         border-radius: 10px;
         box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        background: white;
-        padding: 2rem 2.5rem;
-        margin-top: 3rem;
+        backdrop-filter: blur(5px);
     }
 
-    .store-list-header {
+        .details-card h1 {
+            font-weight: 700;
+            font-size: 24px;
+            color: #7a9a2f;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+    .top-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 12px;
+    }
+
+    .create-btn {
+        background-color: #388e3c;
+        color: white;
+        font-weight: 600;
+        border-radius: 6px;
+        padding: 8px 14px;
+        border: none;
+    }
+
+        .create-btn:hover {
+            background-color: #2e7d32;
+            color: white;
+        }
+
+    .store-detail .input-group {
+        display: flex;
+        flex-direction: column;
+        text-align: left;
+        margin-bottom: 12px;
+    }
+
+    .store-detail label {
         font-weight: 700;
-        color: #2e7d32;
-        text-align: center;
-        margin-bottom: 1.5rem;
+        color: #6b3902;
+        margin-bottom: 6px;
     }
 
     .table thead {
@@ -45,26 +83,41 @@
         margin: 2rem 0;
     }
 
-    .create-btn {
-        background-color: #388e3c;
-        color: white;
+    a.back-link {
+        display: inline-block;
+        margin-top: 18px;
+        color: #2e7d32;
         font-weight: 600;
-        border-radius: 6px;
-        margin-bottom: 1.5rem;
+        font-size: 14px;
+        text-decoration: none;
+        padding: 6px 12px;
+        border: 1.5px solid #2e7d32;
+        border-radius: 12px;
+        transition: 0.3s;
     }
 
-        .create-btn:hover {
-            background-color: #2e7d32;
+        a.back-link:hover {
+            background: #2e7d32;
             color: white;
         }
 </style>
 
-<div class="d-flex justify-content-center align-items-center min-vh-100">
-    <div class="store-list-card">
-        <h2 class="store-list-header">My Store List</h2>
-        <div class="mb-3 text-end">
-            <a asp-page="Create" class="btn create-btn">+ Add Store</a>
+<div class="details-card">
+    <h1>My Store</h1>
+
+    @* Show Add Store only if user has no store *@
+    @if (Model.Stores == null || !Model.Stores.Any())
+    {
+        <div class="top-actions">
+            <a asp-page="Create" class="create-btn"> Open My Store </a>
         </div>
+
+        <div class="empty-message">
+            “Open your Store and let’s get started.”
+        </div>
+    }
+    else
+    {
         <table class="table table-striped table-hover align-middle">
             <thead>
                 <tr>
@@ -74,32 +127,20 @@
                 </tr>
             </thead>
             <tbody>
-                @if (Model.Stores != null && Model.Stores.Any())
-                {
-                    @foreach (var store in Model.Stores)
-                    {
-                        <tr>
-                            <td>@store.Name</td>
-                            <td>@store.UserId</td>
-                            <td>
-                                <a asp-page="./Details" asp-route-storeid="@store.Id" class="btn btn-sm btn-success btn-action">Details</a>
-                                <a asp-page="./Edit" asp-route-storeid="@store.Id" class="btn btn-sm btn-primary btn-action">Edit</a>
-                                <a asp-page="./Delete" asp-route-storeid="@store.Id" class="btn btn-sm btn-danger btn-action">Delete</a>
-                            </td>
-                        </tr>
-                    }
-                }
-                else
+                @foreach (var store in Model.Stores)
                 {
                     <tr>
-                        <td colspan="3" class="empty-message">
-                            No stores available yet!
+                        <td>@store.Name</td>
+                        <td>@store.UserId</td>
+                        <td>
+                            <a asp-page="./Details" asp-route-storeid="@store.Id" class="btn btn-sm btn-success btn-action">Details</a>
+                            <a asp-page="./Edit" asp-route-storeid="@store.Id" class="btn btn-sm btn-primary btn-action">Edit</a>
                         </td>
                     </tr>
                 }
-
             </tbody>
         </table>
-        <a asp-page="/Landing" class="back-link">← Back to Dashboard</a>
-    </div>
+    }
+
+    <a asp-page="/Landing" class="back-link">← Back to Dashboard</a>
 </div>

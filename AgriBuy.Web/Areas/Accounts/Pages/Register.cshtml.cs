@@ -22,28 +22,28 @@ namespace AgriBuy.Web.Areas.Accounts.Pages
 
         public void OnGet()
         {
-            // This method is called on GET requests
+            
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
             {
-                return Page(); // Return the page with validation errors
+                return Page(); 
             }
 
             try
             {
-                // Create a new user using the UserService
+                
                 await _userService.AddAsync(new Contracts.Dto.UserDto
                 {
                     EmailAddress = Input.EmailAddress,
                     FirstName = Input.FirstName,
                     LastName = Input.LastName,
-                    // You may want to hash the password before saving
+                    
                 }, Input.Password);
 
-                // Redirect to a success page or login page
+                
                 return RedirectToPage("/Login", new { area = "Accounts" });
             }
             catch (Exception ex)

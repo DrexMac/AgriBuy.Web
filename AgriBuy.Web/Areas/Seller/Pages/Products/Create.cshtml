@@ -7,38 +7,73 @@
 
 <style>
     body, html {
+        margin: 0;
         height: 100%;
-        background: linear-gradient(135deg, #81c784 0%, #388e3c 100%);
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: url('/images/loginbg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     .create-card {
         width: 600px;
-        border-radius: 10px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        background: white;
+        background-color: rgba(244, 248, 237, 0.95);
         padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        backdrop-filter: blur(4px);
     }
 
     .create-header {
         font-weight: 700;
         color: #2e7d32;
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
         text-align: center;
+        font-size: 1.8rem;
     }
 
-    .form-control, select, textarea {
+    /* Form controls aligned  */
+    .form-group {
+        display: flex;
+        align-items: center;
         margin-bottom: 1rem;
     }
+
+        .form-group label {
+            width: 140px; /*  width for labels */
+            margin-right: 10px;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            flex: 1;
+            max-width: 200px;
+            padding: 0.4rem 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #a5d6a7;
+            font-size: 0.8rem;
+        }
+
+        /* Description */
+        .form-group textarea {
+            height: 60px;
+            resize: vertical;
+        }
 
     .btn-create {
         background-color: #2e7d32;
         color: white;
         border: none;
-        padding: 0.75rem 1.5rem;
+        padding: 0.6rem 1.5rem;
         font-weight: 600;
         border-radius: 6px;
         cursor: pointer;
+        width: 100px;
+        margin-left: 150px;
     }
 
         .btn-create:hover {
@@ -46,11 +81,12 @@
         }
 
     a.back-link {
+        display: inline-block;
+        margin-top: 1.5rem;
         color: #2e7d32;
         font-weight: 600;
         text-decoration: none;
-        display: inline-block;
-        margin-top: 1.5rem;
+        margin-left: 150px; /* align with inputs */
     }
 
         a.back-link:hover {
@@ -58,64 +94,67 @@
         }
 </style>
 
-<div class="d-flex justify-content-center align-items-center min-vh-100">
-    <div class="create-card">
-        <h2 class="create-header"><i class="bi bi-plus-circle"></i> Add New Product</h2>
 
-        <!-- Hidden storeid so if the user came from a store page, it is posted back -->
-        <form method="post" enctype="multipart/form-data">
-            <input asp-for="StoreId" type="hidden" />
+<div class="create-card">
+    <h2 class="create-header"><i class="bi bi-plus-circle"></i> Add New Product</h2>
 
-            <div class="form-group">
-                <label asp-for="Input.Name"></label>
-                <input asp-for="Input.Name" class="form-control" />
-                <span asp-validation-for="Input.Name" class="text-danger"></span>
-            </div>
+    <form method="post" enctype="multipart/form-data">
+        <input asp-for="StoreId" type="hidden" />
 
-            <div class="form-group">
-                <label asp-for="Input.UnitOfMeasure"></label>
-                <select asp-for="Input.UnitOfMeasure" class="form-control">
-                    <option value="">-- Select Unit --</option>
-                    <option value="Kg">Kg</option>
-                    <option value="L">L</option>
-                    <option value="Piece">Piece</option>
-                    <option value="Box">Box</option>
-                    <option value="Pack">Pack</option>
-                </select>
-                <span asp-validation-for="Input.UnitOfMeasure" class="text-danger"></span>
-            </div>
+        <div class="form-group">
+            <label asp-for="Input.Name"></label>
+            <input asp-for="Input.Name" class="form-control" />
+            <span asp-validation-for="Input.Name" class="text-danger"></span>
+        </div>
 
-            <div class="form-group">
-                <label asp-for="Input.UnitPrice"></label>
-                <input asp-for="Input.UnitPrice" class="form-control" />
-                <span asp-validation-for="Input.UnitPrice" class="text-danger"></span>
-            </div>
+        <div class="form-group">
+            <label asp-for="Input.UnitOfMeasure"></label>
+            <select asp-for="Input.UnitOfMeasure" class="form-control">
+                <option value="">-- Select Unit --</option>
+                <option value="Kg">Kg</option>
+                <option value="L">L</option>
+                <option value="Piece">Piece</option>
+                <option value="Box">Box</option>
+                <option value="Pack">Pack</option>
+            </select>
+            <span asp-validation-for="Input.UnitOfMeasure" class="text-danger"></span>
+        </div>
 
-            <div class="form-group">
-                <label asp-for="Input.Quantity"></label>
-                <input asp-for="Input.Quantity" class="form-control" />
-                <span asp-validation-for="Input.Quantity" class="text-danger"></span>
-            </div>
+        <div class="form-group">
+            <label asp-for="Input.UnitPrice"></label>
+            <input asp-for="Input.UnitPrice" class="form-control" />
+            <span asp-validation-for="Input.UnitPrice" class="text-danger"></span>
+        </div>
 
-            <div class="form-group">
-                <label asp-for="Input.Description"></label>
-                <textarea asp-for="Input.Description" class="form-control"></textarea>
-                <span asp-validation-for="Input.Description" class="text-danger"></span>
-            </div>
+        <div class="form-group">
+            <label asp-for="Input.Quantity"></label>
+            <input asp-for="Input.Quantity" class="form-control" />
+            <span asp-validation-for="Input.Quantity" class="text-danger"></span>
+        </div>
 
-            <div class="form-group">
-                <label asp-for="Input.Image"></label>
-                <input asp-for="Input.Image" type="file" class="form-control" />
-                <span asp-validation-for="Input.Image" class="text-danger"></span>
-            </div>
+        <div class="form-group">
+            <label asp-for="Input.Description"></label>
+            <textarea asp-for="Input.Description" class="form-control"></textarea>
+            <span asp-validation-for="Input.Description" class="text-danger"></span>
+        </div>
 
-            <div class="form-group mt-3">
-                <button type="submit" class="btn-create">Create</button>
-            </div>
-        </form>
+        <div class="form-group">
+            <label asp-for="Input.Image"></label>
+            <input asp-for="Input.Image" type="file" class="form-control" />
+            <span asp-validation-for="Input.Image" class="text-danger"></span>
+        </div>
 
-        <a asp-page="/Landing" class="back-link">← Back to Dashboard</a>
-    </div>
+        <div class="form-group mt-3">
+            <button type="submit" class="btn-create">Create</button>
+        </div>
+    </form>
+
+    <a asp-area="Seller"
+       asp-page="/Stores/Details"
+       asp-route-storeid="@Model.StoreId"
+       class="back-link">
+        ← Back to Store 
+    </a>
 </div>
 
 @section Scripts {

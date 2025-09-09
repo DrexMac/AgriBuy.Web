@@ -81,7 +81,7 @@
 </style>
 
 <div class="details-card">
-    <h1>Edit Store</h1>
+    <h1>STORE INFO</h1>
 
     @if (Model.Store == null)
     {
@@ -106,7 +106,12 @@
 
                 <div class="store-actions">
                     <button type="submit" class="btn btn-primary">Save Changes</button>
-                    <a asp-page="Index" class="btn btn-secondary">Back to Store List</a>
+                    <a asp-area="Seller"
+                       asp-page="/Stores/Details"
+                       asp-route-storeid="@Model.Store.Id"
+                       class="btn btn-secondary">
+                        Back to Store Details
+                    </a>
                 </div>
             </form>
         </div>

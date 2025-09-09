@@ -93,7 +93,7 @@
 </style>
 
 <div class="details-card">
-    <h1>Store Details</h1>
+    <h1>MY STORE</h1>
 
     @if (Model.Store == null)
     {
@@ -115,7 +115,6 @@
 
         <div class="store-actions mb-3">
             <a asp-page="Edit" asp-route-storeid="@Model.Store.Id" class="btn btn-primary">Edit</a>
-            <a asp-page="Delete" asp-route-storeid="@Model.Store.Id" class="btn btn-danger">Delete</a>
             <a asp-area="Seller" asp-page="/Products/Create" asp-route-storeid="@Model.Store.Id" class="btn btn-success">Add Product</a>
         </div>
 
@@ -163,5 +162,6 @@
         }
     }
 
-    <a asp-area="Seller" asp-page="/Stores/Index" class="back-link">← Back to Stores List</a>
+    <a asp-page="/Landing" class="back-link">← Back to Dashboard</a>
+
 </div>
