@@ -31,5 +31,9 @@ namespace AgriBuy.Models.ViewModels
         public IFormFile? Image { get; set; }
 
         public IEnumerable<Guid>? OrderIds { get; set; }
+
+        [Required]
+        [DisplayName("Category")]
+        public Guid? CategoryId { get; set; }
     }
 }

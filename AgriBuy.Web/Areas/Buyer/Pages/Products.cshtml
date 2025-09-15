@@ -5,125 +5,174 @@
     ViewData["Title"] = "Products";
 }
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
 <style>
     body {
         margin: 0;
         font-family: Arial, sans-serif;
-        background: url('/images/loginbg.jpg') no-repeat center center fixed;
-        background-size: cover;
+        background-color: #fdfaf6;
         display: flex;
-        justify-content: center;
-        padding: 40px 0;
+        min-height: 100vh;
     }
 
-    .products-container {
-        width: 1000px;
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    /* Sidebar */
+    .sidebar {
+        width: 240px;
+        background-color: #6b4226;
+        color: white;
+        padding: 25px;
+        flex-shrink: 0;
+        height: 100vh;
+        position: sticky;
+        top: 0;
+    }
+
+        .sidebar h2 {
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 24px;
+            color: #f5deb3;
+        }
+
+    .category-menu {
+        display: flex;
+        flex-direction: column;
         gap: 20px;
     }
 
+        .category-menu a {
+            text-decoration: none;
+            color: #f5f5f5;
+            padding: 10px 15px;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+
+            .category-menu a:hover {
+                background-color: #8b5e3c;
+            }
+
+    /* Main Content */
+    .main {
+        flex-grow: 1;
+        padding: 40px 60px;
+    }
+
+        .main h1 {
+            font-size: 32px;
+            color: #6b4226;
+            margin-bottom: 30px;
+        }
+
+    .product-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 25px;
+        justify-content: center;
+    }
+
     .product-card {
-        background-color: rgba(244, 248, 237, 0.95);
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        backdrop-filter: blur(5px);
-        text-align: center;
+        width: 240px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        overflow: hidden;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        transition: transform 0.3s, box-shadow 0.3s;
     }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
 
         .product-card img {
             width: 100%;
-            height: 150px;
+            height: 180px;
             object-fit: cover;
-            border-radius: 6px;
-            margin-bottom: 10px;
         }
 
-        .product-card h3 {
-            font-size: 18px;
-            font-weight: 600;
-            color: #2e7d32;
-            margin: 10px 0 5px 0;
-        }
-
-        .product-card p {
-            margin: 0;
-            font-size: 14px;
-            color: #555;
-        }
-
-        .product-card .price {
-            font-weight: 700;
-            color: #2e7d32;
-            margin: 8px 0;
-        }
-
-        .product-card form button {
-            background-color: #2e7d32;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 8px 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-            .product-card form button:hover {
-                background-color: #27632a;
-            }
-
-    a.back-link {
-        display: inline-flex;
-        align-items: center;
-        background-color: #2e7d32;
-        color: white;
-        font-weight: 600;
-        padding: 0.5rem 1rem;
-        border-radius: 6px;
-        text-decoration: none;
-        margin-bottom: 20px;
-        transition: background-color 0.2s;
+    .product-info {
+        padding: 15px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        text-align: center;
     }
 
-        a.back-link:hover {
-            background-color: #27632a;
-            text-decoration: none;
+        .product-info h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: #333;
         }
 
-        a.back-link i {
-            margin-right: 0.5rem;
+        .product-info p {
+            font-size: 16px;
+            color: #6b4226;
+            font-weight: bold;
+            margin-bottom: 15px;
         }
+
+        .product-info form {
+            margin-top: auto;
+        }
+
+        .product-info button {
+            padding: 10px;
+            background-color: #6b4226;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+            .product-info button:hover {
+                background-color: #8b5e3c;
+            }
 </style>
 
-<div class="container">
-    <a asp-page="/Landing" class="back-link"><i class="bi bi-arrow-left"></i> Back to Home</a>
+<div class="sidebar">
+    <h2>AgriBuy</h2>
+    <div class="category-menu">
+        @foreach (var category in Model.CategoriesWithProducts)
+        {
+            <a asp-page="/Products" asp-area="Buyer" asp-route-categoryId="@category.Id">@category.Name</a>
+        }
+    </div>
+</div>
 
-    @if (!Model.Products.Any())
+<div class="main">
+    <h1>Products</h1>
+
+    @if (!Model.CategoriesWithProducts.Any() || Model.CategoriesWithProducts.All(c => !c.Products.Any()))
     {
-        <div class="empty-message">No products available.</div>
+        <div class="alert alert-info">No products available in this category.</div>
     }
     else
     {
-        <div class="products-container">
-            @foreach (var p in Model.Products)
+        <div class="product-grid">
+            @foreach (var category in Model.CategoriesWithProducts)
             {
-                <div class="product-card">
-                    <img src="@Url.Content(p.ImagePath ?? "~/images/placeholder.png")" alt="@p.Name" />
-                    <h3>@p.Name</h3>
-                    <p>@p.UnitOfMeasure</p>
-                    <div class="price">₱ @p.UnitPrice.ToString("N2")</div>
+                @foreach (var product in category.Products)
+                {
+                    <div class="product-card">
+                        <img src="@Url.Content(product.ImagePath ?? "~/images/placeholder.png")" alt="@product.Name" />
+                        <div class="product-info">
+                            <h3>@product.Name</h3>
+                            <p>₱ @product.UnitPrice.ToString("N2") / @product.UnitOfMeasure</p>
 
-                    <form method="post" asp-page-handler="AddToCartAsync">
-                        <input type="hidden" asp-for="AddToCartInput.ProductId" value="@p.Id" />
-                        <input type="number" asp-for="AddToCartInput.Quantity" value="1" min="1" style="width:60px; margin-bottom:8px;" />
-                        <button type="submit">Add to Cart</button>
-                    </form>
-                </div>
+                            <form method="post" asp-page-handler="AddToCart">
+                                <input type="hidden" name="productId" value="@product.Id" />
+                                <input type="number" name="quantity" value="1" min="1" class="form-control mb-2" />
+                                <button type="submit"><i class="fas fa-cart-plus"></i> Add to Cart</button>
+                            </form>
+                        </div>
+                    </div>
+                }
             }
         </div>
     }

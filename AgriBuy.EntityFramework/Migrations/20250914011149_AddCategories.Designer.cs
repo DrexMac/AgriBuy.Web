@@ -4,6 +4,7 @@ using AgriBuy.EntityFramework;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgriBuy.EntityFramework.Migrations
 {
     [DbContext(typeof(DefaultDbContext))]
-    partial class DefaultDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250914011149_AddCategories")]
+    partial class AddCategories
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,26 +24,6 @@ namespace AgriBuy.EntityFramework.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
-
-            modelBuilder.Entity("AgriBuy.Models.Models.Category", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<Guid?>("ParentId")
-                        .HasColumnType("char(36)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ParentId");
-
-                    b.ToTable("Categories");
-                });
 
             modelBuilder.Entity("AgriBuy.Models.Models.LoginInfo", b =>
                 {
@@ -160,9 +143,6 @@ namespace AgriBuy.EntityFramework.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<Guid?>("CategoryId")
-                        .HasColumnType("char(36)");
-
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
 
@@ -198,8 +178,6 @@ namespace AgriBuy.EntityFramework.Migrations
                         .HasColumnType("char(36)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CategoryId");
 
                     b.HasIndex("StoreId");
 
@@ -361,14 +339,23 @@ namespace AgriBuy.EntityFramework.Migrations
                         });
                 });
 
-            modelBuilder.Entity("AgriBuy.Models.Models.Category", b =>
+            modelBuilder.Entity("Category", b =>
                 {
-                    b.HasOne("AgriBuy.Models.Models.Category", "Parent")
-                        .WithMany("Children")
-                        .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
 
-                    b.Navigation("Parent");
+                    b.Property<string>("Name")
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParentId");
+
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("AgriBuy.Models.Models.LoginInfo", b =>
@@ -425,18 +412,11 @@ namespace AgriBuy.EntityFramework.Migrations
 
             modelBuilder.Entity("AgriBuy.Models.Models.Product", b =>
                 {
-                    b.HasOne("AgriBuy.Models.Models.Category", "Category")
-                        .WithMany("Products")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("AgriBuy.Models.Models.Store", "Store")
                         .WithMany("Products")
                         .HasForeignKey("StoreId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Category");
 
                     b.Navigation("Store");
                 });
@@ -479,11 +459,13 @@ namespace AgriBuy.EntityFramework.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("AgriBuy.Models.Models.Category", b =>
+            modelBuilder.Entity("Category", b =>
                 {
-                    b.Navigation("Children");
+                    b.HasOne("Category", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId");
 
-                    b.Navigation("Products");
+                    b.Navigation("Parent");
                 });
 
             modelBuilder.Entity("AgriBuy.Models.Models.Order", b =>
@@ -512,6 +494,11 @@ namespace AgriBuy.EntityFramework.Migrations
                     b.Navigation("Store");
 
                     b.Navigation("Stores");
+                });
+
+            modelBuilder.Entity("Category", b =>
+                {
+                    b.Navigation("Children");
                 });
 #pragma warning restore 612, 618
         }

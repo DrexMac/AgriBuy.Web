@@ -2,6 +2,7 @@ using AgriBuy.Contracts;
 using AgriBuy.Models.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,20 +16,25 @@ namespace AgriBuy.Web.Pages
         private readonly IProductService _productService;
         private readonly IShoppingCartService _shoppingCartService;
 
+        private readonly ICategoryService _categoryService;
+
         public LandingModel(
             IUserService userService,
             IProductService productService,
-            IShoppingCartService shoppingCartService)
+            IShoppingCartService shoppingCartService,
+            ICategoryService categoryService)
         {
             _userService = userService;
             _productService = productService;
             _shoppingCartService = shoppingCartService;
+            _categoryService = categoryService;
         }
 
         public string? FullName { get; set; }
         public string? Role { get; set; }
 
         public IEnumerable<Product> FeaturedProducts { get; set; } = Enumerable.Empty<Product>();
+        public IEnumerable<Category> Categories { get; set; } = Enumerable.Empty<Category>();
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -47,11 +53,15 @@ namespace AgriBuy.Web.Pages
             FullName = $"{user.FirstName} {user.LastName}";
             Role = user.Role;
 
-            var allProducts = await _productService.GetAllAsync(); // returns IEnumerable<Product>
+            // load products
+            var allProducts = await _productService.GetAllAsync();
             FeaturedProducts = allProducts
                 .OrderBy(p => p.Name)
                 .Take(12)
                 .ToList();
+
+            // load categories 
+            Categories = await _categoryService.GetRootCategoriesAsync();
 
             return Page();
         }

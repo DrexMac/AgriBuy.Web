@@ -1,9 +1,11 @@
 using AgriBuy.Contracts;
+using AgriBuy.EntityFramework;
 using AgriBuy.Models.Models;
 using AgriBuy.Models.ViewModels;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -15,9 +17,13 @@ namespace AgriBuy.Web.Areas.Seller.Pages.Products
         private readonly IStoreService _storeService;
         private readonly IProductService _productService;
         private readonly IMapper _mapper;
+        private readonly DefaultDbContext _context;
 
         [BindProperty]
         public ProductViewModel Input { get; set; } = new();
+
+        [BindProperty]
+        public List<Category> Categories { get; set; } = [];
 
         [BindProperty]
         public Guid? StoreId { get; set; }
@@ -25,16 +31,24 @@ namespace AgriBuy.Web.Areas.Seller.Pages.Products
         public CreateModel(
             IStoreService storeService,
             IProductService productService,
-            IMapper mapper)
+            IMapper mapper,
+            DefaultDbContext context) 
         {
             _storeService = storeService;
             _productService = productService;
             _mapper = mapper;
+            _context = context; 
         }
 
-        public IActionResult OnGet(Guid? storeId = null)
+        public async Task<IActionResult> OnGetAsync(Guid? storeId = null)
         {
             StoreId = storeId;
+
+            //  load categories for dropdown
+            Categories = await _context.Categories
+                .Where(c => c.ParentId == null) 
+                .ToListAsync();
+
             return Page();
         }
 
@@ -76,7 +90,8 @@ namespace AgriBuy.Web.Areas.Seller.Pages.Products
                 Quantity = Input.Quantity,
                 Description = Input.Description,
                 StoreId = store.Id,
-                UserId = userId
+                UserId = userId,
+                CategoryId = Input.CategoryId
             };
 
             // Handle image upload

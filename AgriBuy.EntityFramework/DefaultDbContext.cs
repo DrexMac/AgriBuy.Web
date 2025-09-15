@@ -16,6 +16,7 @@ namespace AgriBuy.EntityFramework
         public DbSet<Product> Products { get; set; } = null!;
         public DbSet<Order> Orders { get; set; } = null!;
         public DbSet<OrderItem> OrderItems { get; set; } = null!;
+        public DbSet<Category> Categories { get; set; } = null!;
         public DbSet<ShoppingCart> ShoppingCarts { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -108,7 +109,7 @@ namespace AgriBuy.EntityFramework
                 .HasForeignKey(p => p.StoreId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // ✅ Explicit Store ↔ User relationship
+            // Explicit Store ↔ User relationship
             modelBuilder.Entity<Store>()
                 .HasOne(s => s.User)
                 .WithMany(u => u.Stores)
@@ -144,7 +145,20 @@ namespace AgriBuy.EntityFramework
                 .WithMany()
                 .HasForeignKey(o => o.StoreId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Category>()
+                .HasMany(c => c.Children)
+                .WithOne(c => c.Parent)
+                .HasForeignKey(c => c.ParentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Category>()
+                .HasMany(c => c.Products)
+                .WithOne(p => p.Category)
+                .HasForeignKey(p => p.CategoryId)
+                .OnDelete(DeleteBehavior.SetNull); 
         }
+
 
         private void ConfigureDecimalPrecision(ModelBuilder modelBuilder)
         {

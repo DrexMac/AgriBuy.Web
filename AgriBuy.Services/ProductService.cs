@@ -24,15 +24,23 @@ namespace AgriBuy.Services
             _mapper = mapper;
         }
 
-        // --- IService<Product> implementation (Seller CRUD)
+        
         public async Task<IEnumerable<Product>> GetAllAsync()
         {
-            return await _repository.All().Include(p => p.Store).ToListAsync();
+            return await _repository
+                .All()
+                .Include(p => p.Store)
+                .Include(p => p.Category)   
+                .ToListAsync();
         }
 
         public async Task<Product?> GetByIdAsync(Guid id)
         {
-            return await _repository.Find(x => x.Id == id).Include(p => p.Store).FirstOrDefaultAsync();
+            return await _repository
+                .Find(x => x.Id == id)
+                .Include(p => p.Store)
+                .Include(p => p.Category)  
+                .FirstOrDefaultAsync();
         }
 
         public async Task AddAsync(Product entity)
@@ -64,6 +72,7 @@ namespace AgriBuy.Services
             var entities = await _repository
                 .Find(x => x.Store != null && x.Store.UserId == userId)
                 .Include(x => x.Store)
+                .Include(x => x.Category)   
                 .ToListAsync();
 
             return _mapper.Map<IEnumerable<ProductDto>>(entities);
@@ -89,6 +98,12 @@ namespace AgriBuy.Services
             entity.StoreId = store.Id;
             entity.UserId = userId;
 
+            
+            if (productDto.CategoryId != Guid.Empty)
+            {
+                entity.CategoryId = productDto.CategoryId;
+            }
+
             await _context.Products.AddAsync(entity);
             await _context.SaveChangesAsync();
         }
@@ -103,8 +118,21 @@ namespace AgriBuy.Services
         // --- Buyer pages ---
         public async Task<IEnumerable<ProductDto>> GetAllProductsAsync()
         {
-            var products = await _repository.All().Include(p => p.Store).ToListAsync();
+            var products = await _repository
+                .All()
+                .Include(p => p.Store)
+                .Include(p => p.Category)   
+                .ToListAsync();
+
             return _mapper.Map<IEnumerable<ProductDto>>(products);
         }
+
+        public async Task<IEnumerable<Category>> GetCategoriesAsync()
+        {
+            return await _context.Categories
+                .Where(c => c.ParentId == null) // only top categories for now
+                .ToListAsync();
+        }
+
     }
 }

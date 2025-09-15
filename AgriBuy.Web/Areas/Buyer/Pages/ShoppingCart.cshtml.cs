@@ -21,26 +21,43 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
         public List<ShoppingCartDto> CartItems { get; set; } = new List<ShoppingCartDto>();
         public decimal OrderTotal { get; set; }
 
-        public async Task<IActionResult> OnGetAsync()
+        private Guid GetCurrentUserId()
+        {
+            var userIdStr = HttpContext.Session.GetString("UserId");
+            return Guid.TryParse(userIdStr, out var userId) ? userId : Guid.Empty;
+        }
+
+        private async Task LoadCartAsync()
         {
             var userId = GetCurrentUserId();
             if (userId == Guid.Empty)
-                return RedirectToPage("/Accounts/Login");
+            {
+                CartItems = new List<ShoppingCartDto>();
+                OrderTotal = 0;
+            }
+            else
+            {
+                CartItems = (await _shoppingCartService.GetByUserIdAsync(userId)).ToList();
+                OrderTotal = CartItems.Sum(x => x.ItemPrice);
+            }
+        }
 
-            CartItems = (await _shoppingCartService.GetByUserIdAsync(userId)).ToList();
-            OrderTotal = CartItems.Sum(x => x.ItemPrice);
+        public async Task<IActionResult> OnGetAsync()
+        {
+            await LoadCartAsync();
             return Page();
         }
 
-        // Fixed Remove: only deletes the specific item
         public async Task<IActionResult> OnPostRemoveAsync(Guid cartItemId)
         {
             await _shoppingCartService.DeleteAsync(cartItemId);
-            return RedirectToPage();
+            await LoadCartAsync(); // reload cart
+            return Page();
         }
 
         public async Task<IActionResult> OnPostIncreaseAsync(Guid cartItemId)
         {
+            await LoadCartAsync(); // reload cart
             var item = CartItems.FirstOrDefault(c => c.Id == cartItemId);
             if (item != null)
             {
@@ -48,11 +65,13 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
                 item.ItemPrice = item.Quantity * item.UnitPrice;
                 await _shoppingCartService.UpdateAsync(item);
             }
-            return RedirectToPage();
+            await LoadCartAsync();
+            return Page();
         }
 
         public async Task<IActionResult> OnPostDecreaseAsync(Guid cartItemId)
         {
+            await LoadCartAsync();
             var item = CartItems.FirstOrDefault(c => c.Id == cartItemId);
             if (item != null)
             {
@@ -65,20 +84,23 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
                     await _shoppingCartService.UpdateAsync(item);
                 }
             }
-            return RedirectToPage();
+            await LoadCartAsync();
+            return Page();
         }
 
         public async Task<IActionResult> OnPostClearAsync()
         {
             var userId = GetCurrentUserId();
             await _shoppingCartService.ClearCartAsync(userId);
-            return RedirectToPage();
+            await LoadCartAsync();
+            return Page();
         }
 
-        private Guid GetCurrentUserId()
+        public async Task<IActionResult> OnPostCheckoutAsync()
         {
-            var userIdStr = HttpContext.Session.GetString("UserId");
-            return Guid.TryParse(userIdStr, out var userId) ? userId : Guid.Empty;
+            // Implement checkout logic here if needed
+            await LoadCartAsync();
+            return Page();
         }
     }
 }

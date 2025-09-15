@@ -35,7 +35,6 @@
                     <i class="bi bi-box-arrow-right fs-1 text-danger mb-2"></i>
                     <h5 class="card-title">Logout</h5>
                     <a asp-area="Accounts" asp-page="/Logout" class="btn btn-outline-danger mt-2">Logout</a>
-
                 </div>
             </div>
         </div>
@@ -46,7 +45,6 @@
                     <i class="bi bi-cart4 fs-1 text-success mb-2"></i>
                     <h5 class="card-title">Shopping Cart</h5>
                     <a asp-area="Buyer" asp-page="/ShoppingCart" class="btn btn-outline-success mt-2">View Cart</a>
-
                 </div>
             </div>
         </div>
@@ -62,7 +60,43 @@
         </div>
     </div>
 
-    <!-- Featured Products (buyer view) -->
+    <!-- Categories Section -->
+    <section class="py-4 overflow-hidden">
+        <div class="d-flex flex-wrap justify-content-between mb-3">
+            <h2 class="h4 mb-0">Categories</h2>
+            <a asp-area="Buyer" asp-page="/Products" class="btn btn-primary">View All</a>
+        </div>
+
+        <div class="row">
+            @foreach (var c in Model.Categories)
+            {
+                // Map a fixed image for each category (from wwwroot/images)
+                string imagePath = c.Name.ToLower() switch
+                {
+                    "meat" => "~/images/meat.jpg",
+                    "fish" => "~/images/fish.png",
+                    "vegetables" => "~/images/vegetable.png",
+                    "fruits" => "~/images/fruit.jpg",
+                    "dairy" => "~/images/dairy.jpg",
+                    "barter" => "~/images/remove the backgroun.png",
+                    _ => "~/images/category-placeholder.png"
+                };
+
+                <div class="col-md-3 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <a asp-area="Buyer" asp-page="/Products" asp-route-categoryId="@c.Id" class="text-decoration-none text-dark">
+                            <img src="@Url.Content(imagePath)" class="card-img-top" alt="@c.Name" style="height:180px; object-fit:cover;" />
+                            <div class="card-body text-center">
+                                <h5 class="card-title">@c.Name</h5>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+
+    </section>
+    <!-- Featured Products Section -->
     <section class="py-4 overflow-hidden">
         <div class="d-flex flex-wrap justify-content-between mb-3">
             <h2 class="h4 mb-0">Featured Products</h2>
@@ -97,7 +131,6 @@
                     </div>
                 }
             </div>
-
         }
     </section>
 </div>

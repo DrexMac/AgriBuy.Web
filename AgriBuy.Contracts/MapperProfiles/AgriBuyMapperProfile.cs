@@ -21,10 +21,16 @@ namespace AgriBuy.Contracts.MapperProfiles
                 .ReverseMap();
 
             CreateMap<OrderItem, OrderItemDto>().ReverseMap();
-            CreateMap<Product, ProductDto>().ReverseMap();
+
+            // ✅ Product ↔ ProductDto (with Category mapping)
+            CreateMap<Product, ProductDto>()
+                .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.CategoryId))
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : null))
+                .ReverseMap();
+
             CreateMap<ProductViewModel, ProductDto>().ReverseMap();
 
-
+            // ✅ ShoppingCart ↔ ShoppingCartDto
             CreateMap<ShoppingCart, ShoppingCartDto>()
                 .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name))
                 .ForMember(dest => dest.ImagePath, opt => opt.MapFrom(src => src.Product.ImagePath))
@@ -35,10 +41,18 @@ namespace AgriBuy.Contracts.MapperProfiles
 
             CreateMap<ShoppingCartDto, ShoppingCart>();
 
+            // ✅ Store ↔ Store mappings
             CreateMap<Store, StoreDto>().ReverseMap();
             CreateMap<Store, StoreViewModel>().ReverseMap();
 
+            // ✅ User mapping
             CreateMap<User, UserDto>().ReverseMap();
+
+            // ✅ Category mapping
+            CreateMap<Category, CategoryDto>()
+                .ForMember(dest => dest.ParentId, opt => opt.MapFrom(src => src.ParentId))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
+                .ReverseMap();
         }
     }
 }
