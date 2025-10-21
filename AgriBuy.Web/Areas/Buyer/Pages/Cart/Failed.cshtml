@@ -1,0 +1,14 @@
+﻿@page
+@model AgriBuy.Web.Areas.Buyer.Pages.Cart.FailedModel
+@{
+    ViewData["Title"] = "Payment Failed";
+}
+
+<div style="text-align:center; margin-top:100px;">
+    <h1 style="color:red;">❌ Payment Failed!</h1>
+    <p>Something went wrong with your payment. Please try again.</p>
+
+    <a asp-area="Buyer" asp-page="/ShoppingCart" class="btn btn-danger mt-3">
+        Back to Cart
+    </a>
+</div>

@@ -1,5 +1,6 @@
 using AgriBuy.Contracts;
 using AgriBuy.Contracts.Dto;
+using AgriBuy.Services.Checkout;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
@@ -12,10 +13,12 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
     public class ShoppingCartModel : PageModel
     {
         private readonly IShoppingCartService _shoppingCartService;
+        private readonly ICheckoutService _checkoutService;
 
-        public ShoppingCartModel(IShoppingCartService shoppingCartService)
+        public ShoppingCartModel(IShoppingCartService shoppingCartService, ICheckoutService checkoutService)
         {
             _shoppingCartService = shoppingCartService;
+            _checkoutService = checkoutService;
         }
 
         public List<ShoppingCartDto> CartItems { get; set; } = new List<ShoppingCartDto>();
@@ -51,13 +54,13 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
         public async Task<IActionResult> OnPostRemoveAsync(Guid cartItemId)
         {
             await _shoppingCartService.DeleteAsync(cartItemId);
-            await LoadCartAsync(); // reload cart
+            await LoadCartAsync();
             return Page();
         }
 
         public async Task<IActionResult> OnPostIncreaseAsync(Guid cartItemId)
         {
-            await LoadCartAsync(); // reload cart
+            await LoadCartAsync();
             var item = CartItems.FirstOrDefault(c => c.Id == cartItemId);
             if (item != null)
             {
@@ -98,9 +101,38 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
 
         public async Task<IActionResult> OnPostCheckoutAsync()
         {
-            // Implement checkout logic here if needed
-            await LoadCartAsync();
-            return Page();
+            var userId = GetCurrentUserId();
+            if (userId == Guid.Empty)
+                return RedirectToPage("/Login");
+
+
+            var successUrlString = Url.Page(
+                "/Cart/Success",
+                pageHandler: null,
+                values: new { area = "Buyer" },
+                protocol: Request.Scheme);
+
+            var failureUrlString = Url.Page(
+                "/Cart/Failed",
+                pageHandler: null,
+                values: new { area = "Buyer" },
+                protocol: Request.Scheme);
+
+            if (string.IsNullOrEmpty(successUrlString) || string.IsNullOrEmpty(failureUrlString))
+                throw new Exception("Unable to generate checkout redirect URLs.");
+
+            var successUrl = new Uri(successUrlString);
+            var failureUrl = new Uri(failureUrlString);
+
+            var redirectUrl = await _checkoutService.CreateCheckoutAndGetRedirectUrlAsync(
+                userId,
+                successUrl,
+                failureUrl
+            );
+
+            return Redirect(redirectUrl);
         }
+
+
     }
 }

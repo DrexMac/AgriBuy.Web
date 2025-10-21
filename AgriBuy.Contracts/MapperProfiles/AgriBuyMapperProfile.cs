@@ -41,14 +41,14 @@ namespace AgriBuy.Contracts.MapperProfiles
 
             CreateMap<ShoppingCartDto, ShoppingCart>();
 
-            // ✅ Store ↔ Store mappings
+            //  Store ↔ Store mappings
             CreateMap<Store, StoreDto>().ReverseMap();
             CreateMap<Store, StoreViewModel>().ReverseMap();
 
-            // ✅ User mapping
+            //  User mapping
             CreateMap<User, UserDto>().ReverseMap();
 
-            // ✅ Category mapping
+            //  Category mapping
             CreateMap<Category, CategoryDto>()
                 .ForMember(dest => dest.ParentId, opt => opt.MapFrom(src => src.ParentId))
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))

@@ -60,6 +60,12 @@ namespace AgriBuy.MySql
         {
             await DbContext.SaveChangesAsync();
         }
+
+        public void DetachTrackedEntity(Guid id)
+        {
+            var tracked = DbSet.Local.FirstOrDefault(e => EF.Property<Guid>(e, "Id") == id);
+            if (tracked != null)
+                DbContext.Entry(tracked).State = EntityState.Detached; 
+        }
     }
 }
-

@@ -1,0 +1,132 @@
+﻿@page
+@model AgriBuy.Web.Areas.Buyer.Pages.Cart.SuccessModel
+@{
+    ViewData["Title"] = "Payment Successful";
+}
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f9fafb;
+        padding: 50px;
+    }
+
+    .success-container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    .success-header {
+        text-align: center;
+        color: #2e7d32;
+        margin-bottom: 20px;
+    }
+
+    .store-section {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        padding: 15px;
+    }
+
+    .store-header {
+        font-weight: bold;
+        font-size: 1.2rem;
+        color: #388e3c;
+        margin-bottom: 10px;
+    }
+
+    .order-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+        .order-table th, .order-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        .order-table th {
+            background-color: #a5d6a7;
+            color: #1b5e20;
+            text-align: left;
+        }
+
+    .total-row {
+        text-align: right;
+        font-weight: bold;
+        color: #2e7d32;
+    }
+
+    .back-btn {
+        display: block;
+        text-align: center;
+        margin-top: 30px;
+    }
+
+        .back-btn a {
+            background-color: #2e7d32;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+            .back-btn a:hover {
+                background-color: #256429;
+            }
+</style>
+
+<div class="success-container">
+    <h1 class="success-header">✅ Payment Successful!</h1>
+    <p class="text-center">Thank you for your purchase. Below is a summary of your latest paid order.</p>
+
+    @if (Model.GroupedOrders.Any())
+    {
+        @foreach (var group in Model.GroupedOrders)
+        {
+            <div class="store-section">
+                <div class="store-header">@group.StoreName</div>
+                <table class="order-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Unit Price</th>
+                            <th>Quantity</th>
+                            <th>Item Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in group.Items)
+                        {
+                            <tr>
+                                <td>@item.ProductName</td>
+                                <td>₱@item.UnitPrice.ToString("N2")</td>
+                                <td>@item.Quantity</td>
+                                <td>₱@item.ItemPrice.ToString("N2")</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td colspan="3" class="total-row">Subtotal:</td>
+                            <td class="total-row">₱@group.Total.ToString("N2")</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        }
+    }
+    else
+    {
+        <p class="text-center text-muted">No recent orders found.</p>
+    }
+
+    <div class="back-btn">
+        <a asp-page="/Landing">Return to Home</a>
+    </div>
+</div>

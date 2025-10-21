@@ -26,5 +26,7 @@ namespace AgriBuy.Contracts
         void Delete(TEntity[] models);
 
         Task SaveChangesAsync();
+
+        void DetachTrackedEntity(Guid id);
     }
 }

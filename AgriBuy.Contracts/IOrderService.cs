@@ -12,5 +12,7 @@ namespace AgriBuy.Contracts
     {
         Task<IEnumerable<OrderDto>> GetByUserIdAsync(Guid userId);
         Task AddAsync(OrderDto orderDto, Guid userId);
+
+        Task DetachedUpdateAsync(OrderDto orderDto);
     }
 }

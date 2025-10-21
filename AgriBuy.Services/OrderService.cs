@@ -69,5 +69,14 @@ namespace AgriBuy.Services
             await _repository.AddAsync(entity);
             await _repository.SaveChangesAsync();
         }
+
+        public async Task DetachedUpdateAsync(OrderDto orderDto)
+        {
+            var entity = _mapper.Map<Order>(orderDto);
+            _repository.DetachTrackedEntity(entity.Id); // new safe detach method
+            _repository.Update(entity);
+            await _repository.SaveChangesAsync();
+        }
+
     }
 }

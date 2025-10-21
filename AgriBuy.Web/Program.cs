@@ -3,10 +3,10 @@ using AgriBuy.Contracts.MapperProfiles;
 using AgriBuy.EntityFramework;
 using AgriBuy.MySql;
 using AgriBuy.Services;
+using AgriBuy.Services.Checkout; 
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 builder.Services.AddDbContextFactory<DefaultDbContext>(dbContextOptions =>
     dbContextOptions.UseMySql(
@@ -18,30 +18,36 @@ builder.Services.AddDbContextFactory<DefaultDbContext>(dbContextOptions =>
                 maxRetryCount: 10,
                 maxRetryDelay: TimeSpan.FromSeconds(30),
                 errorNumbersToAdd: null);
-            mySqlOptions.MigrationsAssembly(typeof(Program).Assembly.FullName); 
+            mySqlOptions.MigrationsAssembly(typeof(Program).Assembly.FullName);
         })
     .LogTo(Console.WriteLine, LogLevel.Information)
     .EnableSensitiveDataLogging()
     .EnableDetailedErrors()
 );
 
-
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddAutoMapper(typeof(AgriBuyMapperProfile));
 
-// Register repositories and services
+
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<ILoginInfoService, LoginInfoService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
-
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IOrderItemService, OrderItemService>();
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddScoped<IStoreService, StoreService>();
 
-// Add services to the container.
+
+builder.Services.AddScoped<ICheckoutService, CheckoutService>();
+builder.Services.AddHttpClient("MayaClient", client =>
+{
+    client.DefaultRequestHeaders.Accept.Add(
+        new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+});
+
+// Add Razor Pages and session support
 builder.Services.AddRazorPages();
 
 builder.Services.AddDistributedMemoryCache();
@@ -60,7 +66,6 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
