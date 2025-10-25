@@ -53,7 +53,6 @@ namespace AgriBuy.Services.Checkout
             if (!cartItems.Any())
                 throw new InvalidOperationException("Your cart is empty.");
 
-            // group cart items by store
             var enriched = new List<(ShoppingCartDto Cart, Product Product)>();
             foreach (var ci in cartItems)
             {
@@ -99,14 +98,11 @@ namespace AgriBuy.Services.Checkout
                         ItemPrice = cart.Quantity * cart.UnitPrice
                     };
                     await _orderItemService.AddAsync(oi);
-
-                    //  Do not deduct stock yet (only after payment success)
                 }
 
                 createdOrders.Add(orderDto);
             }
 
-            // ---- Payment Payload ----
             var payload = new
             {
                 totalAmount = new { value = grandTotal.ToString("0.00"), currency = "PHP" },
@@ -127,43 +123,62 @@ namespace AgriBuy.Services.Checkout
                 }
             };
 
-            // ---- Payment Simulation or PayMaya ----
-            var mayaEndpoint = _config["Maya:Endpoint"];
-            var mayaPublicKey = _config["Maya:PublicKey"];
             string checkoutUrl = successUrl.ToString();
             string? checkoutId = null;
 
+            var mayaEndpoint = _config["Maya:SandboxEndpoint"];
+            var mayaPublicKey = _config["Maya:SandboxPublicKey"];
+
             if (!string.IsNullOrWhiteSpace(mayaEndpoint) && !string.IsNullOrWhiteSpace(mayaPublicKey))
             {
-                var client = _httpFactory.CreateClient("MayaClient");
-                var req = new HttpRequestMessage(HttpMethod.Post, mayaEndpoint)
+                // Simulate sandbox checkout (Visa + E-wallet success)
+                checkoutId = $"SANDBOX-{Guid.NewGuid():N}";
+                _logger.LogInformation("Sandbox checkout created: {CheckoutId}", checkoutId);
+
+                // Automatically mark payment as success
+                await HandlePaymentNotificationAsync(new PaymentNotificationDto
                 {
-                    Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json")
-                };
-                req.Headers.Authorization = new AuthenticationHeaderValue("Basic",
-                    Convert.ToBase64String(Encoding.UTF8.GetBytes($"{mayaPublicKey}:")));
+                    CheckoutId = checkoutId,
+                    Status = "SUCCESS"
+                });
 
-                var resp = await client.SendAsync(req, ct);
-                var body = await resp.Content.ReadAsStringAsync(ct);
-
-                if (!resp.IsSuccessStatusCode)
-                {
-                    _logger.LogError("PayMaya checkout failed: {Status} {Body}", resp.StatusCode, body);
-                    throw new Exception("Payment provider error.");
-                }
-
-                using var doc = JsonDocument.Parse(body);
-                if (doc.RootElement.TryGetProperty("redirectUrl", out var redirectUrlProp))
-                    checkoutUrl = redirectUrlProp.GetString() ?? checkoutUrl;
-                if (doc.RootElement.TryGetProperty("id", out var idProp))
-                    checkoutId = idProp.GetString();
+                checkoutUrl = successUrl.ToString();
             }
             else
             {
-                checkoutId = $"LOCAL-{Guid.NewGuid():N}";
+                var liveEndpoint = _config["Maya:Endpoint"];
+                var liveKey = _config["Maya:PublicKey"];
+                if (!string.IsNullOrWhiteSpace(liveEndpoint) && !string.IsNullOrWhiteSpace(liveKey))
+                {
+                    var client = _httpFactory.CreateClient("MayaClient");
+                    var req = new HttpRequestMessage(HttpMethod.Post, liveEndpoint)
+                    {
+                        Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json")
+                    };
+                    req.Headers.Authorization = new AuthenticationHeaderValue("Basic",
+                        Convert.ToBase64String(Encoding.UTF8.GetBytes($"{liveKey}:")));
+
+                    var resp = await client.SendAsync(req, ct);
+                    var body = await resp.Content.ReadAsStringAsync(ct);
+
+                    if (!resp.IsSuccessStatusCode)
+                    {
+                        _logger.LogError("PayMaya checkout failed: {Status} {Body}", resp.StatusCode, body);
+                        throw new Exception("Payment provider error.");
+                    }
+
+                    using var doc = JsonDocument.Parse(body);
+                    if (doc.RootElement.TryGetProperty("redirectUrl", out var redirectUrlProp))
+                        checkoutUrl = redirectUrlProp.GetString() ?? checkoutUrl;
+                    if (doc.RootElement.TryGetProperty("id", out var idProp))
+                        checkoutId = idProp.GetString();
+                }
+                else
+                {
+                    checkoutId = $"LOCAL-{Guid.NewGuid():N}";
+                }
             }
 
-            // ---- Update Orders with ORNumber safely ----
             foreach (var o in createdOrders)
             {
                 try
@@ -177,7 +192,6 @@ namespace AgriBuy.Services.Checkout
                 }
             }
 
-            //  Removed cart clearing here – handled after successful payment
             return checkoutUrl;
         }
 
@@ -196,14 +210,12 @@ namespace AgriBuy.Services.Checkout
 
             if (success)
             {
-                //  Mark orders as paid, deduct stock, clear cart
                 foreach (var order in matched)
                 {
                     order.IsPaid = true;
                     order.PayDate = DateTime.UtcNow;
                     await _orderService.DetachedUpdateAsync(order);
 
-                    // Deduct stock only after successful payment
                     var items = await _orderItemService.GetByOrderIdAsync(order.Id);
                     foreach (var item in items)
                     {
@@ -216,13 +228,11 @@ namespace AgriBuy.Services.Checkout
                     }
                 }
 
-                // Clear buyer cart after successful payment
                 var userId = matched.First().UserId;
                 await _cartService.ClearCartAsync(userId);
             }
             else
             {
-                //  Payment failed → optionally restore stock
                 foreach (var order in matched)
                 {
                     var items = await _orderItemService.GetByOrderIdAsync(order.Id);
@@ -243,4 +253,3 @@ namespace AgriBuy.Services.Checkout
         }
     }
 }
-

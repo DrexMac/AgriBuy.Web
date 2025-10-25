@@ -42,45 +42,52 @@ namespace AgriBuy.Web.Areas.Buyer.Pages.Cart
             if (userId == Guid.Empty)
                 return RedirectToPage("/Accounts/Login");
 
-            // ? Get all orders for this user, newest first
+            // Get all paid orders for this user, newest first
             var orders = (await _orderService.GetByUserIdAsync(userId))
+                .Where(o => o.IsPaid)
                 .OrderByDescending(o => o.OrderDate)
                 .ToList();
 
             if (!orders.Any())
                 return Page();
 
-            // ? Find the latest PAID order
-            var latestOrder = orders.FirstOrDefault(o => o.IsPaid) ?? orders.First();
+            // Flatten all order items with store info
+            var storeGroups = new Dictionary<Guid, GroupedOrderVm>();
 
-            // ? Load items for this order
-            var orderItems = latestOrder.OrderItems?.ToList() ?? new List<OrderItemDto>();
-            if (!orderItems.Any())
-                return Page();
-
-            // ? Group order items by store
-            var store = await _storeService.GetByIdAsync(latestOrder.StoreId);
-            var storeName = store?.Name ?? "AgriBuy Store";
-
-            var itemsWithNames = new List<OrderItemVm>();
-            foreach (var item in orderItems)
+            foreach (var order in orders)
             {
-                var product = await _productService.GetByIdAsync(item.ProductId);
-                itemsWithNames.Add(new OrderItemVm
+                var orderItems = order.OrderItems?.ToList() ?? new List<OrderItemDto>();
+                foreach (var item in orderItems)
                 {
-                    ProductName = product?.Name ?? $"Product #{item.ProductId}",
-                    Quantity = item.Quantity,
-                    UnitPrice = item.UnitPrice,
-                    ItemPrice = item.ItemPrice
-                });
+                    var product = await _productService.GetByIdAsync(item.ProductId);
+                    var store = await _storeService.GetByIdAsync(order.StoreId);
+                    var storeName = store?.Name ?? "AgriBuy Store";
+
+                    if (!storeGroups.ContainsKey(order.StoreId))
+                    {
+                        storeGroups[order.StoreId] = new GroupedOrderVm
+                        {
+                            StoreName = storeName,
+                            Items = new List<OrderItemVm>()
+                        };
+                    }
+
+                    storeGroups[order.StoreId].Items.Add(new OrderItemVm
+                    {
+                        ProductName = product?.Name ?? $"Product #{item.ProductId}",
+                        Quantity = item.Quantity,
+                        UnitPrice = item.UnitPrice,
+                        ItemPrice = item.ItemPrice
+                    });
+                }
             }
 
-            GroupedOrders.Add(new GroupedOrderVm
+            // Compute totals per store
+            foreach (var group in storeGroups.Values)
             {
-                StoreName = storeName,
-                Items = itemsWithNames,
-                Total = itemsWithNames.Sum(i => i.ItemPrice)
-            });
+                group.Total = group.Items.Sum(i => i.ItemPrice);
+                GroupedOrders.Add(group);
+            }
 
             return Page();
         }
