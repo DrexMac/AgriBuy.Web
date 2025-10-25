@@ -1,6 +1,6 @@
 using AgriBuy.Contracts;
 using AgriBuy.Contracts.Dto;
-using AgriBuy.Models.ViewModels;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
@@ -27,62 +27,60 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
         }
 
         public List<CategoryWithProductsVm> CategoriesWithProducts { get; set; } = new();
+        public List<AgriBuy.Models.Models.Category> AllCategories { get; set; } = new();
+        public Guid? SelectedCategoryId { get; set; }
 
-        //  Load products and categories
         public async Task OnGetAsync(Guid? categoryId = null)
         {
             var allProducts = await _productService.GetAllAsync();
-            var rootCategories = await _categoryService.GetRootCategoriesAsync();
+            var allCategories = await _categoryService.GetRootCategoriesAsync();
+
+            AllCategories = allCategories.ToList();
+            SelectedCategoryId = categoryId;
 
             if (categoryId.HasValue)
             {
-                var selectedCategory = rootCategories.FirstOrDefault(c => c.Id == categoryId.Value);
-                if (selectedCategory != null)
-                {
-                    CategoriesWithProducts = new List<CategoryWithProductsVm>
-                    {
-                        new CategoryWithProductsVm
-                        {
-                            Id = selectedCategory.Id,
-                            Name = selectedCategory.Name,
-                            Products = allProducts.Where(p => p.CategoryId == selectedCategory.Id).ToList()
-                        }
-                    };
-                }
-            }
-            else
-            {
-                CategoriesWithProducts = rootCategories
+                CategoriesWithProducts = allCategories
+                    .Where(c => c.Id == categoryId.Value)
                     .Select(c => new CategoryWithProductsVm
                     {
                         Id = c.Id,
                         Name = c.Name,
-                        Products = allProducts.Where(p => p.CategoryId == c.Id).ToList()
+                        Products = allProducts
+                            .Where(p => p.CategoryId == c.Id)
+                            .ToList()
+                    })
+                    .ToList();
+            }
+            else
+            {
+                CategoriesWithProducts = allCategories
+                    .Select(c => new CategoryWithProductsVm
+                    {
+                        Id = c.Id,
+                        Name = c.Name,
+                        Products = allProducts
+                            .Where(p => p.CategoryId == c.Id)
+                            .ToList()
                     })
                     .ToList();
             }
         }
 
-        //  Add to Cart handler
         public async Task<IActionResult> OnPostAddToCartAsync(Guid productId, int quantity)
         {
-            //  Resolve current user ID from session
             var userIdStr = HttpContext.Session.GetString("UserId");
             if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
-            {
-                // User not logged in ? redirect to login page
                 return RedirectToPage("/Accounts/Login", new { area = "Buyer" });
-            }
 
             var product = await _productService.GetByIdAsync(productId);
             if (product == null)
             {
                 ModelState.AddModelError("", "Product not found.");
-                await OnGetAsync(); // reload products
+                await OnGetAsync();
                 return Page();
             }
 
-            //  Check stock
             if (product.Quantity < quantity)
             {
                 ModelState.AddModelError("", $"Not enough stock for {product.Name}. Available: {product.Quantity}");
@@ -90,13 +88,11 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
                 return Page();
             }
 
-            //  Check if item exists in cart
             var existingItems = await _shoppingCartService.GetByUserIdAsync(userId);
             var existing = existingItems.FirstOrDefault(ci => ci.ProductId == product.Id);
 
             if (existing != null)
             {
-                // Merge quantity
                 existing.Quantity += quantity;
                 existing.ItemPrice = existing.Quantity * existing.UnitPrice;
                 await _shoppingCartService.UpdateAsync(existing);
@@ -118,11 +114,9 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
                 await _shoppingCartService.AddAsync(cartItem);
             }
 
-            //  Reduce product stock
             product.Quantity -= quantity;
             await _productService.UpdateAsync(product);
 
-            //  Redirect to ShoppingCart page
             return RedirectToPage("/ShoppingCart", new { area = "Buyer" });
         }
 

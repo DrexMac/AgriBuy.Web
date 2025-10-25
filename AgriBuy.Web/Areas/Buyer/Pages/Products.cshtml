@@ -16,7 +16,6 @@
         min-height: 100vh;
     }
 
-    /* Sidebar */
     .sidebar {
         width: 240px;
         background-color: #6b4226;
@@ -49,20 +48,62 @@
             transition: background 0.3s;
         }
 
-            .category-menu a:hover {
+            .category-menu a:hover,
+            .category-menu a.active {
                 background-color: #8b5e3c;
             }
 
-    /* Main Content */
     .main {
         flex-grow: 1;
         padding: 40px 60px;
     }
 
-        .main h1 {
-            font-size: 32px;
-            color: #6b4226;
-            margin-bottom: 30px;
+    .main-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .main h1 {
+        font-size: 32px;
+        color: #6b4226;
+    }
+
+    .btn-outline-secondary {
+        padding: 8px 14px;
+        border: 1px solid #6b4226;
+        color: #6b4226;
+        background-color: #fff;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: all 0.3s;
+    }
+
+        .btn-outline-secondary:hover {
+            background-color: #6b4226;
+            color: #fff;
+        }
+
+    .btn-back {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #6b4226;
+        font-weight: bold;
+        text-decoration: none;
+        background-color: #fff;
+        border: 1px solid #6b4226;
+        padding: 8px 12px;
+        border-radius: 6px;
+        transition: all 0.3s;
+    }
+
+        .btn-back:hover {
+            background-color: #6b4226;
+            color: #fff;
         }
 
     .product-grid {
@@ -85,7 +126,7 @@
 
         .product-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
         }
 
         .product-card img {
@@ -116,10 +157,6 @@
             margin-bottom: 15px;
         }
 
-        .product-info form {
-            margin-top: auto;
-        }
-
         .product-info button {
             padding: 10px;
             background-color: #6b4226;
@@ -138,15 +175,42 @@
 <div class="sidebar">
     <h2>AgriBuy</h2>
     <div class="category-menu">
-        @foreach (var category in Model.CategoriesWithProducts)
+        @foreach (var category in Model.AllCategories)
         {
-            <a asp-page="/Products" asp-area="Buyer" asp-route-categoryId="@category.Id">@category.Name</a>
+            var active = category.Id == Model.SelectedCategoryId ? "active" : "";
+            <a asp-page="/Products" asp-area="Buyer" asp-route-categoryId="@category.Id" class="@active">
+                @category.Name
+            </a>
         }
     </div>
 </div>
 
 <div class="main">
-    <h1>Products</h1>
+    <div class="main-header">
+        <h1>
+            @if (Model.SelectedCategoryId.HasValue)
+            {
+                var selected = Model.AllCategories.FirstOrDefault(c => c.Id == Model.SelectedCategoryId);
+                @($"{selected?.Name ?? "Category"} Products")
+            }
+            else
+            {
+                @("All Products")
+            }
+        </h1>
+
+        <a asp-page="/Landing" class="btn-outline-secondary">
+            <i class="fa fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    @if (Model.SelectedCategoryId.HasValue)
+    {
+        <!-- Back to all categories button -->
+        <a asp-page="/Products" class="btn-back">
+            <i class="fa fa-arrow-left"></i> Back to All Categories
+        </a>
+    }
 
     @if (!Model.CategoriesWithProducts.Any() || Model.CategoriesWithProducts.All(c => !c.Products.Any()))
     {

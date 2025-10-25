@@ -36,7 +36,7 @@ namespace AgriBuy.Models.Models
 
         public string ImagePath { get; set; } = string.Empty;
 
-        public ICollection<Order> Orders { get; set; } = new List<Order>();
+        public ICollection<Order> OrderItems { get; set; } = new List<Order>();
 
         public Guid? CategoryId { get; set; }
         public Category? Category { get; set; }

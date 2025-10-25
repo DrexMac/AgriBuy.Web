@@ -23,11 +23,12 @@ namespace AgriBuy.Services
 
         public async Task<IEnumerable<ShoppingCartDto>> GetByUserIdAsync(Guid userId)
         {
-            // Include Product to get seller info
             var entities = await _repository.Find(x => x.UserId == userId)
                                             .Include(x => x.Product)
+                                            .Where(x => x.Product != null && !x.Product.IsDeleted)
                                             .AsNoTracking()
                                             .ToListAsync();
+
             return _mapper.Map<IEnumerable<ShoppingCartDto>>(entities);
         }
 
@@ -40,7 +41,6 @@ namespace AgriBuy.Services
 
         public async Task UpdateAsync(ShoppingCartDto model)
         {
-            // Fetch existing entity to avoid EF tracking conflict
             var entity = await _repository.Find(x => x.Id == model.Id).FirstOrDefaultAsync();
             if (entity != null)
             {

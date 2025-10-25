@@ -95,13 +95,13 @@ namespace AgriBuy.EntityFramework
                 .HasMany(o => o.OrderItems)
                 .WithOne(oi => oi.Order)
                 .HasForeignKey(oi => oi.OrderId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<OrderItem>()
                 .HasOne(oi => oi.Product)
                 .WithMany()
                 .HasForeignKey(oi => oi.ProductId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Store>()
                 .HasMany(s => s.Products)
@@ -126,7 +126,7 @@ namespace AgriBuy.EntityFramework
                 .HasOne(sc => sc.Product)
                 .WithMany()
                 .HasForeignKey(sc => sc.ProductId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<LoginInfo>()
                 .HasOne(li => li.User)
@@ -138,13 +138,13 @@ namespace AgriBuy.EntityFramework
                 .HasOne(o => o.User)
                 .WithMany(u => u.Orders)
                 .HasForeignKey(o => o.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Order>()
                 .HasOne(o => o.Store)
                 .WithMany()
                 .HasForeignKey(o => o.StoreId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Category>()
                 .HasMany(c => c.Children)

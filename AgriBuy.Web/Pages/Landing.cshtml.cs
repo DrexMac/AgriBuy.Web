@@ -2,7 +2,6 @@ using AgriBuy.Contracts;
 using AgriBuy.Models.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +14,6 @@ namespace AgriBuy.Web.Pages
         private readonly IUserService _userService;
         private readonly IProductService _productService;
         private readonly IShoppingCartService _shoppingCartService;
-
         private readonly ICategoryService _categoryService;
 
         public LandingModel(
@@ -32,7 +30,6 @@ namespace AgriBuy.Web.Pages
 
         public string? FullName { get; set; }
         public string? Role { get; set; }
-
         public IEnumerable<Product> FeaturedProducts { get; set; } = Enumerable.Empty<Product>();
         public IEnumerable<Category> Categories { get; set; } = Enumerable.Empty<Category>();
 
@@ -40,20 +37,15 @@ namespace AgriBuy.Web.Pages
         {
             var userIdStr = HttpContext.Session.GetString("UserId");
             if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
-            {
                 return RedirectToPage("/Accounts/Login");
-            }
 
             var user = await _userService.GetByIdAsync(userId);
-            if (user == null)
-            {
-                return RedirectToPage("/Accounts/Login");
-            }
+            if (user == null) return RedirectToPage("/Accounts/Login");
 
             FullName = $"{user.FirstName} {user.LastName}";
             Role = user.Role;
 
-            // load products
+            // load products excluding deleted
             var allProducts = await _productService.GetAllAsync();
             FeaturedProducts = allProducts
                 .OrderBy(p => p.Name)
@@ -62,31 +54,24 @@ namespace AgriBuy.Web.Pages
 
             // load categories 
             Categories = await _categoryService.GetRootCategoriesAsync();
-
             return Page();
         }
 
-        // POST: /Landing?handler=AddToCart
+        // POST: Add to cart
         public async Task<IActionResult> OnPostAddToCartAsync(Guid productId, int quantity)
         {
             if (quantity < 1) quantity = 1;
 
             var userIdStr = HttpContext.Session.GetString("UserId");
             if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
-            {
                 return RedirectToPage("/Accounts/Login");
-            }
 
             var product = await _productService.GetByIdAsync(productId);
-            if (product == null)
-            {
-                return NotFound();
-            }
+            if (product == null) return NotFound();
 
             var existingItems = await _shoppingCartService.GetByUserIdAsync(userId);
             var existing = existingItems.FirstOrDefault(ci => ci.ProductId == productId);
 
-            // Check stock for the requested quantity
             if (product.Quantity < quantity)
             {
                 TempData["ErrorMessage"] = $"Not enough stock available for {product.Name}.";
@@ -95,18 +80,15 @@ namespace AgriBuy.Web.Pages
 
             if (existing != null)
             {
-                // Merge quantities in cart
                 existing.Quantity += quantity;
                 existing.ItemPrice = existing.Quantity * existing.UnitPrice;
                 await _shoppingCartService.UpdateAsync(existing);
 
-                // Reduce product stock every time
                 product.Quantity -= quantity;
                 await _productService.UpdateAsync(product);
             }
             else
             {
-                // Add new cart item
                 var cartItem = new AgriBuy.Contracts.Dto.ShoppingCartDto
                 {
                     Id = Guid.NewGuid(),
@@ -120,7 +102,7 @@ namespace AgriBuy.Web.Pages
                     ItemPrice = product.UnitPrice * quantity
                 };
 
-                product.Quantity -= quantity; // Reduce stock
+                product.Quantity -= quantity;
                 await _shoppingCartService.AddAsync(cartItem);
                 await _productService.UpdateAsync(product);
             }

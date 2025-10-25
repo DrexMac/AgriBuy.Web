@@ -25,11 +25,7 @@ namespace AgriBuy.Web.Areas.Seller.Pages.Products
 
         public async Task OnGetAsync(Guid? itemid = null)
         {
-            if (itemid == null)
-            {
-                Item = null;
-                return;
-            }
+            if (itemid == null) { Item = null; return; }
 
             Item = await _context.Products
                 .Include(p => p.Store)
@@ -38,27 +34,21 @@ namespace AgriBuy.Web.Areas.Seller.Pages.Products
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (Item == null)
-            {
-                return NotFound();
-            }
+            if (Item == null) return NotFound();
 
-            // Load product including store info
             var product = await _context.Products
                 .Include(p => p.Store)
                 .FirstOrDefaultAsync(p => p.Id == Item.Id);
 
-            if (product == null)
-            {
-                return NotFound();
-            }
+            if (product == null) return NotFound();
 
-            var storeId = product.StoreId;
-
-            _context.Products.Remove(product);
+            // Soft delete
+            product.IsDeleted = true;
             await _context.SaveChangesAsync();
 
-            return RedirectToPage("/Stores/Details", new { area = "Seller", storeid = storeId });
+            TempData["SuccessMessage"] = $"Product '{product.Name}' has been deleted successfully.";
+
+            return RedirectToPage("/Stores/Details", new { area = "Seller", storeid = product.StoreId });
         }
     }
 }

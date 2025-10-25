@@ -24,22 +24,22 @@ namespace AgriBuy.Services
             _mapper = mapper;
         }
 
-        
         public async Task<IEnumerable<Product>> GetAllAsync()
         {
             return await _repository
                 .All()
+                .Where(p => !p.IsDeleted) // exclude deleted products
                 .Include(p => p.Store)
-                .Include(p => p.Category)   
+                .Include(p => p.Category)
                 .ToListAsync();
         }
 
         public async Task<Product?> GetByIdAsync(Guid id)
         {
             return await _repository
-                .Find(x => x.Id == id)
+                .Find(x => x.Id == id && !x.IsDeleted) // exclude deleted
                 .Include(p => p.Store)
-                .Include(p => p.Category)  
+                .Include(p => p.Category)
                 .FirstOrDefaultAsync();
         }
 
@@ -61,7 +61,7 @@ namespace AgriBuy.Services
             var entity = await _repository.Find(x => x.Id == id).FirstOrDefaultAsync();
             if (entity != null)
             {
-                _repository.Delete(entity);
+                entity.IsDeleted = true; // soft delete
                 await _repository.SaveChangesAsync();
             }
         }
@@ -70,9 +70,9 @@ namespace AgriBuy.Services
         public async Task<IEnumerable<ProductDto>> GetByUserIdAsync(Guid userId)
         {
             var entities = await _repository
-                .Find(x => x.Store != null && x.Store.UserId == userId)
+                .Find(x => x.Store != null && x.Store.UserId == userId && !x.IsDeleted) // exclude deleted
                 .Include(x => x.Store)
-                .Include(x => x.Category)   
+                .Include(x => x.Category)
                 .ToListAsync();
 
             return _mapper.Map<IEnumerable<ProductDto>>(entities);
@@ -98,7 +98,6 @@ namespace AgriBuy.Services
             entity.StoreId = store.Id;
             entity.UserId = userId;
 
-            
             if (productDto.CategoryId != Guid.Empty)
             {
                 entity.CategoryId = productDto.CategoryId;
@@ -120,8 +119,9 @@ namespace AgriBuy.Services
         {
             var products = await _repository
                 .All()
+                .Where(p => !p.IsDeleted) // exclude deleted
                 .Include(p => p.Store)
-                .Include(p => p.Category)   
+                .Include(p => p.Category)
                 .ToListAsync();
 
             return _mapper.Map<IEnumerable<ProductDto>>(products);
@@ -130,9 +130,8 @@ namespace AgriBuy.Services
         public async Task<IEnumerable<Category>> GetCategoriesAsync()
         {
             return await _context.Categories
-                .Where(c => c.ParentId == null) // only top categories for now
+                .Where(c => c.ParentId == null)
                 .ToListAsync();
         }
-
     }
 }

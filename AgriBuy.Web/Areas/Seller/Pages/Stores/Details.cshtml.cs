@@ -27,7 +27,7 @@ namespace AgriBuy.Web.Areas.Seller.Pages.Stores
             }
 
             Store = await _context.Stores
-                .Include(s => s.Products)
+                .Include(s => s.Products.Where(p => !p.IsDeleted)) // exclude deleted
                 .FirstOrDefaultAsync(s => s.Id == storeid.Value);
         }
     }

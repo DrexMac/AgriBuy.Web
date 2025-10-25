@@ -1,25 +1,113 @@
 ﻿@page
 @model AgriBuy.Web.Areas.Seller.Pages.Stores.CreateModel
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
 @{
     ViewData["Title"] = "Create Store";
 }
-<h2>“Let them know your Brand”</h2>
-<hr />
-<div class="row shadow">
-    <div class="col-md-6">
-        <form method="post">
-            <div class="form-group">
-                <label asp-for="Input.Name" class="control-label"></label>
-                <input asp-for="Input.Name" class="form-control" />
-                <span asp-validation-for="Input.Name" class="text-danger"></span>
-            </div>
-            <div class="form-group mt-2">
-                <input type="submit" value="Launch" class="btn btn-primary" />
-                <a class="btn btn-secondary" asp-page="Index">Back</a>
-            </div>
-        </form>
-    </div>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: url('/images/loginbg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 40px 0;
+    }
+
+    .create-store-card {
+        width: 700px;
+        background-color: rgba(244, 248, 237, 0.85);
+        padding: 30px 25px;
+        border-radius: 10px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        backdrop-filter: blur(5px);
+    }
+
+        .create-store-card h1 {
+            font-weight: 700;
+            font-size: 24px;
+            color: #7a9a2f;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    label {
+        font-weight: 700;
+        color: #6b3902;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    input.form-control {
+        border: 1.5px solid #7a9a9a;
+        padding: 8px 10px;
+        font-size: 14px;
+        border-radius: 3px;
+        outline: none;
+        background-color: #f4f8ed;
+        width: 100%;
+    }
+
+    .btn-launch {
+        background-color: #7a9a2f;
+        color: white;
+        font-weight: 600;
+        border: none;
+        padding: 10px 25px;
+        border-radius: 6px;
+        transition: 0.3s;
+    }
+
+        .btn-launch:hover {
+            background-color: #6b8b28;
+        }
+
+    .btn-back {
+        color: #2e7d32;
+        font-weight: 600;
+        border: 1.5px solid #2e7d32;
+        padding: 10px 25px;
+        border-radius: 6px;
+        margin-left: 10px;
+        background: transparent;
+        transition: 0.3s;
+    }
+
+        .btn-back:hover {
+            background-color: #2e7d32;
+            color: white;
+        }
+
+    .error-text {
+        color: red;
+        font-size: 14px;
+    }
+</style>
+
+<div class="create-store-card">
+    <h1>“Let them know your Brand”</h1>
+    <hr />
+
+    <form method="post">
+        <div class="form-group">
+            <label asp-for="Input.Name" class="control-label"></label>
+            <input asp-for="Input.Name" class="form-control" placeholder="Enter your store name..." />
+            <span asp-validation-for="Input.Name" class="error-text"></span>
+        </div>
+
+        <div class="form-group">
+            <input type="submit" value="Launch" class="btn-launch" />
+            <a asp-page="/Landing" class="btn-back">Back</a>
+        </div>
+    </form>
 </div>
 
 @section Scripts {

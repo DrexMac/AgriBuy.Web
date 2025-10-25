@@ -31,6 +31,8 @@ namespace AgriBuy.Web.Areas.Seller.Pages.Stores
 
         public async Task<IActionResult> OnGet()
         {
+            Input = new StoreViewModel(); 
+
             var orders = await _orderService.GetAllAsync();
             var ordersWithNumber = orders.Select(s => new Order
             {
@@ -41,6 +43,7 @@ namespace AgriBuy.Web.Areas.Seller.Pages.Stores
             ViewData["Orders"] = ordersWithNumber;
             return Page();
         }
+
 
         public async Task<IActionResult> OnPostAsync()
         {
@@ -59,6 +62,8 @@ namespace AgriBuy.Web.Areas.Seller.Pages.Stores
             
             return RedirectToPage("/Stores/Details", new { area = "Seller", storeid = Input.Id });
         }
+
+
 
 
     }
