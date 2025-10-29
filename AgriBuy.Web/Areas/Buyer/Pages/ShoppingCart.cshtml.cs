@@ -130,7 +130,15 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
                 failureUrl
             );
 
+            // After successful checkout, redirect back to cart page to show updated (cleared) cart
+            if (redirectUrl.Contains("Success", StringComparison.OrdinalIgnoreCase))
+            {
+                await _shoppingCartService.ClearCartAsync(userId); // extra safety clear
+                return RedirectToPage("/ShoppingCart", new { area = "Buyer" });
+            }
+
             return Redirect(redirectUrl);
+
         }
 
 

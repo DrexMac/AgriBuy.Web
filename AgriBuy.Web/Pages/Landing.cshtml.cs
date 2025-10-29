@@ -84,8 +84,7 @@ namespace AgriBuy.Web.Pages
                 existing.ItemPrice = existing.Quantity * existing.UnitPrice;
                 await _shoppingCartService.UpdateAsync(existing);
 
-                product.Quantity -= quantity;
-                await _productService.UpdateAsync(product);
+                
             }
             else
             {
@@ -102,9 +101,8 @@ namespace AgriBuy.Web.Pages
                     ItemPrice = product.UnitPrice * quantity
                 };
 
-                product.Quantity -= quantity;
                 await _shoppingCartService.AddAsync(cartItem);
-                await _productService.UpdateAsync(product);
+                
             }
 
             return RedirectToPage("/ShoppingCart", new { area = "Buyer" });

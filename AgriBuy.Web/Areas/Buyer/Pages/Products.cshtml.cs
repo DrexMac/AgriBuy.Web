@@ -113,10 +113,7 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
                 };
                 await _shoppingCartService.AddAsync(cartItem);
             }
-
-            product.Quantity -= quantity;
-            await _productService.UpdateAsync(product);
-
+         
             return RedirectToPage("/ShoppingCart", new { area = "Buyer" });
         }
 

@@ -1,9 +1,9 @@
-using AgriBuy.Contracts;
-using AgriBuy.Contracts.Dto;
+using AgriBuy.EntityFramework;
+using AgriBuy.Models.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -11,100 +11,61 @@ namespace AgriBuy.Web.Areas.Buyer.Pages.Cart
 {
     public class SuccessModel : PageModel
     {
-        private readonly IOrderService _orderService;
-        private readonly IOrderItemService _orderItemService;
-        private readonly IProductService _productService;
-        private readonly IStoreService _storeService;
+        private readonly DefaultDbContext _context;
 
-        public SuccessModel(
-            IOrderService orderService,
-            IOrderItemService orderItemService,
-            IProductService productService,
-            IStoreService storeService)
+        public SuccessModel(DefaultDbContext context)
         {
-            _orderService = orderService;
-            _orderItemService = orderItemService;
-            _productService = productService;
-            _storeService = storeService;
-        }
-
-        public List<GroupedOrderVm> GroupedOrders { get; set; } = new();
-
-        private Guid GetCurrentUserId()
-        {
-            var userIdStr = HttpContext.Session.GetString("UserId");
-            return Guid.TryParse(userIdStr, out var userId) ? userId : Guid.Empty;
+            _context = context;
         }
 
         public async Task<IActionResult> OnGetAsync()
         {
-            var userId = GetCurrentUserId();
-            if (userId == Guid.Empty)
+            var userIdStr = HttpContext.Session.GetString("UserId");
+            if (!Guid.TryParse(userIdStr, out var userId))
                 return RedirectToPage("/Accounts/Login");
 
-            // Get all paid orders for this user, newest first
-            var orders = (await _orderService.GetByUserIdAsync(userId))
-                .Where(o => o.IsPaid)
+            //  Find latest unpaid order
+            var latestOrder = await _context.Orders
+                .Where(o => o.UserId == userId && !o.IsPaid)
                 .OrderByDescending(o => o.OrderDate)
-                .ToList();
+                .Include(o => o.OrderItems)
+                .FirstOrDefaultAsync();
 
-            if (!orders.Any())
-                return Page();
-
-            // Flatten all order items with store info
-            var storeGroups = new Dictionary<Guid, GroupedOrderVm>();
-
-            foreach (var order in orders)
+            if (latestOrder != null)
             {
-                var orderItems = order.OrderItems?.ToList() ?? new List<OrderItemDto>();
-                foreach (var item in orderItems)
+                //  Mark order as paid + set PayDate + generate OR Number
+                latestOrder.IsPaid = true;
+                latestOrder.PayDate = DateTime.UtcNow;
+                latestOrder.ORNumber = $"OR-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid().ToString()[..6]}";
+
+                //  Deduct product stock
+                foreach (var item in latestOrder.OrderItems)
                 {
-                    var product = await _productService.GetByIdAsync(item.ProductId);
-                    var store = await _storeService.GetByIdAsync(order.StoreId);
-                    var storeName = store?.Name ?? "AgriBuy Store";
-
-                    if (!storeGroups.ContainsKey(order.StoreId))
+                    var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == item.ProductId);
+                    if (product != null)
                     {
-                        storeGroups[order.StoreId] = new GroupedOrderVm
-                        {
-                            StoreName = storeName,
-                            Items = new List<OrderItemVm>()
-                        };
+                        product.Quantity -= item.Quantity;
+                        _context.Products.Update(product);
                     }
-
-                    storeGroups[order.StoreId].Items.Add(new OrderItemVm
-                    {
-                        ProductName = product?.Name ?? $"Product #{item.ProductId}",
-                        Quantity = item.Quantity,
-                        UnitPrice = item.UnitPrice,
-                        ItemPrice = item.ItemPrice
-                    });
                 }
+
+                //  Save all updates
+                _context.Orders.Update(latestOrder);
+                await _context.SaveChangesAsync();
             }
 
-            // Compute totals per store
-            foreach (var group in storeGroups.Values)
+            //   buyer's shopping cart
+            var cartItems = await _context.ShoppingCarts
+                .Where(c => c.UserId == userId)
+                .ToListAsync();
+
+            if (cartItems.Any())
             {
-                group.Total = group.Items.Sum(i => i.ItemPrice);
-                GroupedOrders.Add(group);
+                _context.ShoppingCarts.RemoveRange(cartItems);
+                await _context.SaveChangesAsync();
             }
 
             return Page();
-        }
-
-        public class GroupedOrderVm
-        {
-            public string StoreName { get; set; } = string.Empty;
-            public List<OrderItemVm> Items { get; set; } = new();
-            public decimal Total { get; set; }
-        }
-
-        public class OrderItemVm
-        {
-            public string ProductName { get; set; } = string.Empty;
-            public decimal UnitPrice { get; set; }
-            public int Quantity { get; set; }
-            public decimal ItemPrice { get; set; }
         }
     }
 }

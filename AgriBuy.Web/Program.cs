@@ -3,7 +3,8 @@ using AgriBuy.Contracts.MapperProfiles;
 using AgriBuy.EntityFramework;
 using AgriBuy.MySql;
 using AgriBuy.Services;
-using AgriBuy.Services.Checkout; 
+using AgriBuy.Services.Checkout;
+using AgriBuy.Services.Notifications;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,6 +39,9 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IOrderItemService, OrderItemService>();
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddScoped<IStoreService, StoreService>();
+builder.Services.AddScoped<IStoreNotificationService, StoreNotificationService>();
+
+
 
 
 builder.Services.AddScoped<ICheckoutService, CheckoutService>();
@@ -46,6 +50,7 @@ builder.Services.AddHttpClient("MayaClient", client =>
     client.DefaultRequestHeaders.Accept.Add(
         new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 });
+
 
 // Add Razor Pages and session support
 builder.Services.AddRazorPages();

@@ -22,7 +22,7 @@ namespace AgriBuy.Contracts.MapperProfiles
 
             CreateMap<OrderItem, OrderItemDto>().ReverseMap();
 
-            // ✅ Product ↔ ProductDto (with Category mapping)
+            // Product ↔ ProductDto (with Category mapping)
             CreateMap<Product, ProductDto>()
                 .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.CategoryId))
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : null))
@@ -30,7 +30,7 @@ namespace AgriBuy.Contracts.MapperProfiles
 
             CreateMap<ProductViewModel, ProductDto>().ReverseMap();
 
-            // ✅ ShoppingCart ↔ ShoppingCartDto
+            //  ShoppingCart ↔ ShoppingCartDto
             CreateMap<ShoppingCart, ShoppingCartDto>()
                 .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name))
                 .ForMember(dest => dest.ImagePath, opt => opt.MapFrom(src => src.Product.ImagePath))

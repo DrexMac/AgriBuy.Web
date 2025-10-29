@@ -1,14 +1,66 @@
 ﻿@page
 @model AgriBuy.Web.Areas.Buyer.Pages.Cart.FailedModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     ViewData["Title"] = "Payment Failed";
 }
 
-<div style="text-align:center; margin-top:100px;">
-    <h1 style="color:red;">❌ Payment Failed!</h1>
-    <p>Something went wrong with your payment. Please try again.</p>
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: url('/images/loginbg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
 
-    <a asp-area="Buyer" asp-page="/ShoppingCart" class="btn btn-danger mt-3">
-        Back to Cart
-    </a>
+    .fail-card {
+        background-color: rgba(255, 240, 240, 0.95);
+        padding: 40px 50px;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+
+    .fail-icon {
+        font-size: 60px;
+        color: #c62828;
+        margin-bottom: 15px;
+    }
+
+    h2 {
+        color: #c62828;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    p {
+        color: #444;
+        font-size: 16px;
+        margin-bottom: 25px;
+    }
+
+    a.back-link {
+        background-color: #2e7d32;
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: background-color 0.2s;
+    }
+
+        a.back-link:hover {
+            background-color: #27632a;
+        }
+</style>
+
+<div class="fail-card">
+    <div class="fail-icon">❌</div>
+    <h2>Payment Failed</h2>
+    <p>Something went wrong during the checkout process. Please try again.</p>
+    <a asp-page="/ShoppingCart" class="back-link">Return to Shop</a>
 </div>

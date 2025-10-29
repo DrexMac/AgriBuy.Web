@@ -116,6 +116,7 @@
         <div class="store-actions mb-3">
             <a asp-page="Edit" asp-route-storeid="@Model.Store.Id" class="btn btn-primary">Edit</a>
             <a asp-area="Seller" asp-page="/Products/Create" asp-route-storeid="@Model.Store.Id" class="btn btn-success">Add Product</a>
+            <a asp-area="Seller" asp-page="/Orders/Status" asp-route-storeid="@Model.Store.Id" class="btn btn-warning"> View Orders</a>
         </div>
 
         <hr />
@@ -151,10 +152,8 @@
                             <td>₱ @p.UnitPrice.ToString("N2")</td>
                             <td>@p.Quantity</td>
                             <td>
-                                
                                 <a asp-area="Seller" asp-page="/Products/Edit" asp-route-itemid="@p.Id" class="btn btn-sm btn-primary">Edit</a>
                                 <a asp-area="Seller" asp-page="/Products/Delete" asp-route-itemid="@p.Id" class="btn btn-sm btn-danger">Delete</a>
-
                             </td>
                         </tr>
                     }
@@ -164,5 +163,4 @@
     }
 
     <a asp-page="/Landing" class="back-link">← Back to Dashboard</a>
-
 </div>

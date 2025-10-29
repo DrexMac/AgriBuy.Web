@@ -29,7 +29,7 @@ namespace AgriBuy.EntityFramework
             ConfigureDecimalPrecision(modelBuilder);
             ConfigureStringLengthAndRequiredFields(modelBuilder);
 
-            
+            // Seed sample data
             var userId1 = Guid.Parse("00000000-0000-0000-0000-000000000001");
             var storeId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
             var productId1 = Guid.Parse("22222222-2222-2222-2222-222222222222");
@@ -48,7 +48,7 @@ namespace AgriBuy.EntityFramework
             {
                 Id = storeId1,
                 Name = "AgriBuy Store",
-                UserId = userId1 // FK 
+                UserId = userId1
             });
 
             modelBuilder.Entity<Product>().HasData(
@@ -91,72 +91,82 @@ namespace AgriBuy.EntityFramework
 
         private void ConfigureRelationships(ModelBuilder modelBuilder)
         {
+            // Order ↔ OrderItems
             modelBuilder.Entity<Order>()
                 .HasMany(o => o.OrderItems)
                 .WithOne(oi => oi.Order)
                 .HasForeignKey(oi => oi.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // OrderItem ↔ Product
             modelBuilder.Entity<OrderItem>()
                 .HasOne(oi => oi.Product)
                 .WithMany()
                 .HasForeignKey(oi => oi.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // Store ↔ Products
             modelBuilder.Entity<Store>()
                 .HasMany(s => s.Products)
                 .WithOne(p => p.Store)
                 .HasForeignKey(p => p.StoreId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Explicit Store ↔ User relationship
+            // Store ↔ User
             modelBuilder.Entity<Store>()
                 .HasOne(s => s.User)
                 .WithMany(u => u.Stores)
                 .HasForeignKey(s => s.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            //  Store ↔ Orders (NEW)
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Store)
+                .WithMany(s => s.Orders)
+                .HasForeignKey(o => o.StoreId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // ShoppingCart ↔ User
             modelBuilder.Entity<ShoppingCart>()
                 .HasOne(sc => sc.User)
                 .WithMany()
                 .HasForeignKey(sc => sc.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // ShoppingCart ↔ Product
             modelBuilder.Entity<ShoppingCart>()
                 .HasOne(sc => sc.Product)
                 .WithMany()
                 .HasForeignKey(sc => sc.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // LoginInfo ↔ User
             modelBuilder.Entity<LoginInfo>()
                 .HasOne(li => li.User)
                 .WithMany(u => u.LoginInfos)
                 .HasForeignKey(li => li.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // Order ↔ User
             modelBuilder.Entity<Order>()
                 .HasOne(o => o.User)
                 .WithMany(u => u.Orders)
                 .HasForeignKey(o => o.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Order>()
-                .HasOne(o => o.Store)
-                .WithMany()
-                .HasForeignKey(o => o.StoreId)
-                .OnDelete(DeleteBehavior.Cascade);
-
+            // Category ↔ Subcategories
             modelBuilder.Entity<Category>()
                 .HasMany(c => c.Children)
                 .WithOne(c => c.Parent)
                 .HasForeignKey(c => c.ParentId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Category ↔ Products
             modelBuilder.Entity<Category>()
                 .HasMany(c => c.Products)
                 .WithOne(p => p.Category)
                 .HasForeignKey(p => p.CategoryId)
-                .OnDelete(DeleteBehavior.SetNull); 
+                .OnDelete(DeleteBehavior.SetNull);
         }
 
 

@@ -103,6 +103,8 @@ namespace AgriBuy.Services.Checkout
                 createdOrders.Add(orderDto);
             }
 
+            var webhookUrl = "https://localhost:7003/Buyer/Checkouts?handler=Notify"; 
+
             var payload = new
             {
                 totalAmount = new { value = grandTotal.ToString("0.00"), currency = "PHP" },
@@ -120,8 +122,10 @@ namespace AgriBuy.Services.Checkout
                     success = successUrl.ToString(),
                     failure = failureUrl.ToString(),
                     cancel = failureUrl.ToString()
-                }
+                },
+                webhookUrl = webhookUrl
             };
+
 
             string checkoutUrl = successUrl.ToString();
             string? checkoutId = null;
@@ -131,11 +135,11 @@ namespace AgriBuy.Services.Checkout
 
             if (!string.IsNullOrWhiteSpace(mayaEndpoint) && !string.IsNullOrWhiteSpace(mayaPublicKey))
             {
-                // Simulate sandbox checkout (Visa + E-wallet success)
+                
                 checkoutId = $"SANDBOX-{Guid.NewGuid():N}";
                 _logger.LogInformation("Sandbox checkout created: {CheckoutId}", checkoutId);
 
-                // Automatically mark payment as success
+                
                 await HandlePaymentNotificationAsync(new PaymentNotificationDto
                 {
                     CheckoutId = checkoutId,

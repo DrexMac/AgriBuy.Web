@@ -1,132 +1,66 @@
 ﻿@page
 @model AgriBuy.Web.Areas.Buyer.Pages.Cart.SuccessModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
-    ViewData["Title"] = "Payment Successful";
+    ViewData["Title"] = "Order Successful";
 }
 
 <style>
     body {
+        margin: 0;
         font-family: Arial, sans-serif;
-        background-color: #f9fafb;
-        padding: 50px;
+        background: url('/images/loginbg.jpg') no-repeat center center fixed;
+        background-size: cover;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
     }
 
-    .success-container {
-        max-width: 900px;
-        margin: 0 auto;
-        background: white;
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-    }
-
-    .success-header {
+    .success-card {
+        background-color: rgba(244, 248, 237, 0.95);
+        padding: 40px 50px;
+        border-radius: 15px;
         text-align: center;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+
+    .success-icon {
+        font-size: 60px;
         color: #2e7d32;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
     }
 
-    .store-section {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        margin-bottom: 25px;
-        padding: 15px;
-    }
-
-    .store-header {
-        font-weight: bold;
-        font-size: 1.2rem;
-        color: #388e3c;
+    h2 {
+        color: #2e7d32;
+        font-weight: 700;
         margin-bottom: 10px;
     }
 
-    .order-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
+    p {
+        color: #444;
+        font-size: 16px;
+        margin-bottom: 25px;
     }
 
-        .order-table th, .order-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-        }
-
-        .order-table th {
-            background-color: #a5d6a7;
-            color: #1b5e20;
-            text-align: left;
-        }
-
-    .total-row {
-        text-align: right;
-        font-weight: bold;
-        color: #2e7d32;
+    a.back-link {
+        background-color: #2e7d32;
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: background-color 0.2s;
     }
 
-    .back-btn {
-        display: block;
-        text-align: center;
-        margin-top: 30px;
-    }
-
-        .back-btn a {
-            background-color: #2e7d32;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 6px;
-            text-decoration: none;
-            transition: background-color 0.2s;
+        a.back-link:hover {
+            background-color: #27632a;
         }
-
-            .back-btn a:hover {
-                background-color: #256429;
-            }
 </style>
 
-<div class="success-container">
-    <h1 class="success-header">✅ Payment Successful!</h1>
-    <p class="text-center">Thank you for your purchase. Below is a summary of your latest paid order.</p>
-
-    @if (Model.GroupedOrders.Any())
-    {
-        @foreach (var group in Model.GroupedOrders)
-        {
-            <div class="store-section">
-                <div class="store-header">@group.StoreName</div>
-                <table class="order-table">
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Unit Price</th>
-                            <th>Quantity</th>
-                            <th>Item Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in group.Items)
-                        {
-                            <tr>
-                                <td>@item.ProductName</td>
-                                <td>₱@item.UnitPrice.ToString("N2")</td>
-                                <td>@item.Quantity</td>
-                                <td>₱@item.ItemPrice.ToString("N2")</td>
-                            </tr>
-                        }
-                        <tr>
-                            <td colspan="3" class="total-row">Subtotal:</td>
-                            <td class="total-row">₱@group.Total.ToString("N2")</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        }
-    }
-    else
-    {
-        <p class="text-center text-muted">No recent orders found.</p>
-    }
-
-    <div class="back-btn">
-        <a asp-area="Buyer" asp-page="/ShoppingCart">Return to Cart</a>
-    </div>
+<div class="success-card">
+    <div class="success-icon">✅</div>
+    <h2>Payment Successful!</h2>
+    <p>Thank you for your purchase. Your order has been placed successfully.</p>
+    <a asp-page="/ShoppingCart" class="back-link">Continue Shopping</a>
 </div>
