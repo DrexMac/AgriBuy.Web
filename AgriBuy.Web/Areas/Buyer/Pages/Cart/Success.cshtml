@@ -23,6 +23,7 @@
         border-radius: 15px;
         text-align: center;
         box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        width: 600px;
     }
 
     .success-icon {
@@ -56,11 +57,66 @@
         a.back-link:hover {
             background-color: #27632a;
         }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+        font-size: 14px;
+    }
+
+    th {
+        background-color: #a5d6a7;
+        color: #1b5e20;
+    }
 </style>
 
 <div class="success-card">
     <div class="success-icon">✅</div>
     <h2>Payment Successful!</h2>
     <p>Thank you for your purchase. Your order has been placed successfully.</p>
+
+    @if (Model.LatestPaidOrder != null)
+    {
+        <div>
+            <h3>Order #: @Model.LatestPaidOrder.OrderNumber</h3>
+            <p><strong>Date:</strong> @Model.LatestPaidOrder.PayDate?.ToString("MMM dd, yyyy hh:mm tt")</p>
+            <p><strong>OR #:</strong> @Model.LatestPaidOrder.ORNumber</p>
+            <p><strong>Total:</strong> ₱ @Model.LatestPaidOrder.TotalPrice.ToString("N2")</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.LatestPaidOrder.OrderItems)
+                    {
+                        <tr>
+                            <td>@item.Product?.Name</td>
+                            <td>@item.Quantity</td>
+                            <td>₱ @item.UnitPrice.ToString("N2")</td>
+                            <td>₱ @((item.Quantity * item.UnitPrice).ToString("N2"))</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <p>No recent order found.</p>
+    }
+
     <a asp-page="/ShoppingCart" class="back-link">Continue Shopping</a>
 </div>

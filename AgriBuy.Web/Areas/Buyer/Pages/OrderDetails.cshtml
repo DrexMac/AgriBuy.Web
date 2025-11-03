@@ -1,0 +1,120 @@
+﻿@page
+@model AgriBuy.Web.Areas.Buyer.Pages.Cart.OrderDetailsModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "My Order Details";
+}
+
+<style>
+    .orders-card {
+        width: 90%;
+        max-width: 1000px;
+        background-color: rgba(244, 248, 237, 0.95);
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        margin: 20px auto;
+    }
+
+    h1 {
+        text-align: center;
+        color: #2e7d32;
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+
+    .table-container {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #c8e6c9;
+        border-radius: 8px;
+        background-color: #fff;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 600px;
+    }
+
+    th, td {
+        border: 1px solid #ddd;
+        padding: 12px 10px;
+        text-align: left;
+        font-size: 15px;
+    }
+
+    th {
+        background-color: #a5d6a7;
+        color: #1b5e20;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    .paid {
+        color: #2e7d32;
+        font-weight: bold;
+    }
+
+    .no-orders {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+    }
+
+    .table-container::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .table-container::-webkit-scrollbar-thumb {
+        background: #a5d6a7;
+        border-radius: 4px;
+    }
+
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #81c784;
+        }
+</style>
+
+<div class="orders-card">
+    <h1>🧾 My Orders</h1>
+
+    @if (!Model.Orders.Any())
+    {
+        <div class="no-orders">No orders found.</div>
+    }
+    else
+    {
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order #</th>
+                        <th>Total Price</th>
+                        <th>Pay Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model.Orders)
+                    {
+                        <tr>
+                            <td>@order.OrderNumber</td>
+                            <td>₱ @order.TotalPrice.ToString("N2")</td>
+                            <td>@order.PayDate?.ToString("MMM dd, yyyy hh:mm tt")</td>
+                            <td class="paid">COMPLETED</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

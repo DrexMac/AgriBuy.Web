@@ -79,6 +79,7 @@
         font-weight: 600;
         border-radius: 6px;
         cursor: pointer;
+        text-decoration: none;
     }
 
         .checkout-btn:hover {
@@ -110,6 +111,35 @@
         display: flex;
         justify-content: space-between;
         margin-top: 1rem;
+        align-items: center;
+    }
+
+    .qty-control {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .qty-btn {
+        width: 30px;
+        height: 30px;
+        border: none;
+        border-radius: 5px;
+        background-color: #a5d6a7;
+        color: #1b5e20;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+        .qty-btn:hover {
+            background-color: #81c784;
+        }
+
+    .qty-display {
+        min-width: 40px;
+        text-align: center;
+        font-weight: 600;
     }
 </style>
 
@@ -147,7 +177,17 @@
                             <br />@item.ProductName
                         </td>
                         <td>@item.UnitOfMeasure</td>
-                        <td>@item.Quantity</td>
+                        <td>
+                            <div class="qty-control">
+                                <form method="post" asp-page-handler="Decrease" asp-route-cartItemId="@item.Id" style="display:inline;">
+                                    <button type="submit" class="qty-btn">-</button>
+                                </form>
+                                <span class="qty-display">@item.Quantity</span>
+                                <form method="post" asp-page-handler="Increase" asp-route-cartItemId="@item.Id" style="display:inline;">
+                                    <button type="submit" class="qty-btn">+</button>
+                                </form>
+                            </div>
+                        </td>
                         <td>₱ @(item.UnitPrice.ToString("N2"))</td>
                         <td>₱ @((item.UnitPrice * item.Quantity).ToString("N2"))</td>
                         <td>
@@ -169,9 +209,13 @@
                 <button type="submit" class="clear-btn">Clear Cart</button>
             </form>
 
-            <form method="post" asp-page-handler="Checkout" style="display:inline;">
-                <button type="submit" class="checkout-btn">Proceed to Checkout</button>
-            </form>
+            <div style="display:flex; gap:10px;">
+                <form method="post" asp-page-handler="Checkout" style="display:inline;">
+                    <button type="submit" class="checkout-btn">Proceed Checkout</button>
+                </form>
+
+                <a asp-page="/Cart/OrderDetails" class="checkout-btn">View Order Details</a>
+            </div>
         </div>
     }
 </div>

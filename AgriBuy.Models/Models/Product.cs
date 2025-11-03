@@ -10,8 +10,6 @@ namespace AgriBuy.Models.Models
     public class Product
     {
         public Guid Id { get; set; }
-
-        
         public Guid UserId { get; set; }
 
         [Required]
