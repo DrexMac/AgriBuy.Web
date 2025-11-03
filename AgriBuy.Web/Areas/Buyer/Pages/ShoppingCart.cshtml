@@ -141,6 +141,64 @@
         text-align: center;
         font-weight: 600;
     }
+
+    hr {
+        border: 1px solid #c5e1a5;
+        margin: 30px 0;
+    }
+
+    h3 {
+        color: #33691e;
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+
+    /* === Scrollable Recent Orders (show scrollbar only if >3) === */
+    .recent-orders {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #c8e6c9;
+        border-radius: 8px;
+        background-color: #fff;
+        margin-top: 10px;
+    }
+
+        .recent-orders table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .recent-orders th, .recent-orders td {
+            border: 1px solid #ddd;
+            padding: 12px 10px;
+            text-align: left;
+            font-size: 15px;
+        }
+
+        .recent-orders th {
+            background-color: #a5d6a7;
+            color: #1b5e20;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .recent-orders tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .recent-orders::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .recent-orders::-webkit-scrollbar-thumb {
+            background: #a5d6a7;
+            border-radius: 4px;
+        }
+
+            .recent-orders::-webkit-scrollbar-thumb:hover {
+                background: #81c784;
+            }
 </style>
 
 <div class="cart-card">
@@ -209,13 +267,47 @@
                 <button type="submit" class="clear-btn">Clear Cart</button>
             </form>
 
-            <div style="display:flex; gap:10px;">
-                <form method="post" asp-page-handler="Checkout" style="display:inline;">
-                    <button type="submit" class="checkout-btn">Proceed Checkout</button>
-                </form>
+            <form method="post" asp-page-handler="Checkout" style="display:inline;">
+                <button type="submit" class="checkout-btn">Proceed Checkout</button>
+            </form>
+        </div>
+    }
 
-                <a asp-page="/Cart/OrderDetails" class="checkout-btn">View Order Details</a>
-            </div>
+    @if (Model.RecentPaidOrders.Any())
+    {
+        <hr />
+        <h3>🧾 Recent Orders</h3>
+        <div class="recent-orders">
+            <table>
+                <thead>
+                    <tr>
+                        <th>OR Number</th>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Total</th>
+                        <th>Pay Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model.RecentPaidOrders)
+                    {
+                        foreach (var item in order.OrderItems)
+                        {
+                            <tr>
+                                <td>@order.ORNumber</td>
+                                <td>@item.Product?.Name</td>
+                                <td>@item.Quantity</td>
+                                <td>₱ @item.UnitPrice.ToString("N2")</td>
+                                <td>₱ @((item.Quantity * item.UnitPrice).ToString("N2"))</td>
+                                <td>@order.PayDate?.ToString("MMM dd, yyyy hh:mm tt")</td>
+                                <td>Delivered</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
         </div>
     }
 </div>

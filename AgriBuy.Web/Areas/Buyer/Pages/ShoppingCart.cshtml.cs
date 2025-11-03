@@ -1,8 +1,11 @@
 using AgriBuy.Contracts;
 using AgriBuy.Contracts.Dto;
 using AgriBuy.Services.Checkout;
+using AgriBuy.EntityFramework;
+using AgriBuy.Models.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,15 +17,18 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
     {
         private readonly IShoppingCartService _shoppingCartService;
         private readonly ICheckoutService _checkoutService;
+        private readonly DefaultDbContext _context;
 
-        public ShoppingCartModel(IShoppingCartService shoppingCartService, ICheckoutService checkoutService)
+        public ShoppingCartModel(IShoppingCartService shoppingCartService, ICheckoutService checkoutService, DefaultDbContext context)
         {
             _shoppingCartService = shoppingCartService;
             _checkoutService = checkoutService;
+            _context = context;
         }
 
-        public List<ShoppingCartDto> CartItems { get; set; } = new List<ShoppingCartDto>();
+        public List<ShoppingCartDto> CartItems { get; set; } = new();
         public decimal OrderTotal { get; set; }
+        public List<Order> RecentPaidOrders { get; set; } = new();
 
         private Guid GetCurrentUserId()
         {
@@ -35,19 +41,33 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
             var userId = GetCurrentUserId();
             if (userId == Guid.Empty)
             {
-                CartItems = new List<ShoppingCartDto>();
+                CartItems = new();
                 OrderTotal = 0;
+                return;
             }
-            else
-            {
-                CartItems = (await _shoppingCartService.GetByUserIdAsync(userId)).ToList();
-                OrderTotal = CartItems.Sum(x => x.ItemPrice);
-            }
+
+            CartItems = (await _shoppingCartService.GetByUserIdAsync(userId)).ToList();
+            OrderTotal = CartItems.Sum(x => x.ItemPrice);
+        }
+
+        private async Task LoadRecentPaidOrdersAsync()
+        {
+            var userId = GetCurrentUserId();
+            if (userId == Guid.Empty) return;
+
+            RecentPaidOrders = await _context.Orders
+                .Where(o => o.UserId == userId && o.IsPaid)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(i => i.Product)
+                .OrderByDescending(o => o.PayDate)
+                .Take(3)
+                .ToListAsync();
         }
 
         public async Task<IActionResult> OnGetAsync()
         {
             await LoadCartAsync();
+            await LoadRecentPaidOrdersAsync();
             return Page();
         }
 
@@ -55,6 +75,7 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
         {
             await _shoppingCartService.DeleteAsync(cartItemId);
             await LoadCartAsync();
+            await LoadRecentPaidOrdersAsync();
             return Page();
         }
 
@@ -69,6 +90,7 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
                 await _shoppingCartService.UpdateAsync(item);
             }
             await LoadCartAsync();
+            await LoadRecentPaidOrdersAsync();
             return Page();
         }
 
@@ -88,6 +110,7 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
                 }
             }
             await LoadCartAsync();
+            await LoadRecentPaidOrdersAsync();
             return Page();
         }
 
@@ -96,6 +119,7 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
             var userId = GetCurrentUserId();
             await _shoppingCartService.ClearCartAsync(userId);
             await LoadCartAsync();
+            await LoadRecentPaidOrdersAsync();
             return Page();
         }
 
@@ -104,7 +128,6 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
             var userId = GetCurrentUserId();
             if (userId == Guid.Empty)
                 return RedirectToPage("/Login");
-
 
             var successUrlString = Url.Page(
                 "/Cart/Success",
@@ -118,9 +141,6 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
                 values: new { area = "Buyer" },
                 protocol: Request.Scheme);
 
-            if (string.IsNullOrEmpty(successUrlString) || string.IsNullOrEmpty(failureUrlString))
-                throw new Exception("Unable to generate checkout redirect URLs.");
-
             var successUrl = new Uri(successUrlString);
             var failureUrl = new Uri(failureUrlString);
 
@@ -130,17 +150,13 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
                 failureUrl
             );
 
-            // After successful checkout, redirect back to cart page to show updated (cleared) cart
             if (redirectUrl.Contains("Success", StringComparison.OrdinalIgnoreCase))
             {
-                await _shoppingCartService.ClearCartAsync(userId); // extra safety clear
+                await _shoppingCartService.ClearCartAsync(userId);
                 return RedirectToPage("/ShoppingCart", new { area = "Buyer" });
             }
 
             return Redirect(redirectUrl);
-
         }
-
-
     }
 }

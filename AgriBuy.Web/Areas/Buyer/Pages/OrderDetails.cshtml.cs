@@ -1,5 +1,6 @@
 using AgriBuy.EntityFramework;
 using AgriBuy.Models.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -20,21 +21,20 @@ namespace AgriBuy.Web.Areas.Buyer.Pages.Cart
 
         public List<Order> Orders { get; set; } = new();
 
-        public async Task OnGetAsync(Guid? userId = null, bool latestOnly = false)
+        public async Task<IActionResult> OnGetAsync()
         {
-            if (userId == null)
-                return;
+            var userIdStr = HttpContext.Session.GetString("UserId");
+            if (!Guid.TryParse(userIdStr, out var userId))
+                return RedirectToPage("/Accounts/Login");
 
-            var query = _context.Orders
+            Orders = await _context.Orders
                 .Include(o => o.OrderItems)
                     .ThenInclude(i => i.Product)
                 .Where(o => o.UserId == userId && o.IsPaid)
-                .OrderByDescending(o => o.PayDate);
+                .OrderByDescending(o => o.PayDate)
+                .ToListAsync();
 
-            if (latestOnly)
-                Orders = await query.Take(1).ToListAsync();
-            else
-                Orders = await query.ToListAsync();
+            return Page();
         }
     }
 }
