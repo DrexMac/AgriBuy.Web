@@ -103,7 +103,7 @@ namespace AgriBuy.Services.Checkout
                 createdOrders.Add(orderDto);
             }
 
-            var webhookUrl = "https://localhost:7003/Buyer/Checkouts?handler=Notify"; 
+            var webhookUrl = "https://localhost:7003/Buyer/Checkouts?handler=Notify";
 
             var payload = new
             {
@@ -126,20 +126,24 @@ namespace AgriBuy.Services.Checkout
                 webhookUrl = webhookUrl
             };
 
-
             string checkoutUrl = successUrl.ToString();
             string? checkoutId = null;
 
-            var mayaEndpoint = _config["Maya:SandboxEndpoint"];
-            var mayaPublicKey = _config["Maya:SandboxPublicKey"];
+            var isSandbox = !string.IsNullOrWhiteSpace(_config["Maya:SandboxEndpoint"]);
+            var endpoint = isSandbox ? _config["Maya:SandboxEndpoint"] : _config["Maya:Endpoint"];
+            var apiKey = isSandbox ? _config["Maya:SandboxPublicKey"] : _config["Maya:PublicKey"];
 
-            if (!string.IsNullOrWhiteSpace(mayaEndpoint) && !string.IsNullOrWhiteSpace(mayaPublicKey))
+            if (string.IsNullOrWhiteSpace(endpoint) || string.IsNullOrWhiteSpace(apiKey))
             {
-                
+                throw new InvalidOperationException("Maya endpoint or API key is missing.");
+            }
+
+            if (isSandbox)
+            {
+                // Simulate Sandbox checkout
                 checkoutId = $"SANDBOX-{Guid.NewGuid():N}";
                 _logger.LogInformation("Sandbox checkout created: {CheckoutId}", checkoutId);
 
-                
                 await HandlePaymentNotificationAsync(new PaymentNotificationDto
                 {
                     CheckoutId = checkoutId,
@@ -150,39 +154,32 @@ namespace AgriBuy.Services.Checkout
             }
             else
             {
-                var liveEndpoint = _config["Maya:Endpoint"];
-                var liveKey = _config["Maya:PublicKey"];
-                if (!string.IsNullOrWhiteSpace(liveEndpoint) && !string.IsNullOrWhiteSpace(liveKey))
+                var client = _httpFactory.CreateClient();
+                var req = new HttpRequestMessage(HttpMethod.Post, endpoint)
                 {
-                    var client = _httpFactory.CreateClient("MayaClient");
-                    var req = new HttpRequestMessage(HttpMethod.Post, liveEndpoint)
-                    {
-                        Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json")
-                    };
-                    req.Headers.Authorization = new AuthenticationHeaderValue("Basic",
-                        Convert.ToBase64String(Encoding.UTF8.GetBytes($"{liveKey}:")));
+                    Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json")
+                };
 
-                    var resp = await client.SendAsync(req, ct);
-                    var body = await resp.Content.ReadAsStringAsync(ct);
+                var encodedKey = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{apiKey}:"));
+                req.Headers.Authorization = new AuthenticationHeaderValue("Basic", encodedKey);
 
-                    if (!resp.IsSuccessStatusCode)
-                    {
-                        _logger.LogError("PayMaya checkout failed: {Status} {Body}", resp.StatusCode, body);
-                        throw new Exception("Payment provider error.");
-                    }
+                var resp = await client.SendAsync(req, ct);
+                var body = await resp.Content.ReadAsStringAsync(ct);
 
-                    using var doc = JsonDocument.Parse(body);
-                    if (doc.RootElement.TryGetProperty("redirectUrl", out var redirectUrlProp))
-                        checkoutUrl = redirectUrlProp.GetString() ?? checkoutUrl;
-                    if (doc.RootElement.TryGetProperty("id", out var idProp))
-                        checkoutId = idProp.GetString();
-                }
-                else
+                if (!resp.IsSuccessStatusCode)
                 {
-                    checkoutId = $"LOCAL-{Guid.NewGuid():N}";
+                    _logger.LogError("PayMaya checkout failed: {Status} {Body}", resp.StatusCode, body);
+                    throw new Exception("Payment provider error.");
                 }
+
+                using var doc = JsonDocument.Parse(body);
+                if (doc.RootElement.TryGetProperty("redirectUrl", out var redirectUrlProp))
+                    checkoutUrl = redirectUrlProp.GetString() ?? checkoutUrl;
+                if (doc.RootElement.TryGetProperty("id", out var idProp))
+                    checkoutId = idProp.GetString();
             }
 
+            // Update orders with checkout ID
             foreach (var o in createdOrders)
             {
                 try
@@ -256,4 +253,6 @@ namespace AgriBuy.Services.Checkout
             }
         }
     }
+
+    
 }

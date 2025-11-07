@@ -47,9 +47,9 @@
         transition: background-color 0.2s;
     }
 
-        a.back-link:hover {
-            background-color: #27632a;
-        }
+    a.back-link:hover {
+        background-color: #27632a;
+    }
 
     .table thead {
         background-color: #a5d6a7;
@@ -82,9 +82,9 @@
         text-decoration: none;
     }
 
-        .checkout-btn:hover {
-            background-color: #27632a;
-        }
+    .checkout-btn:hover {
+        background-color: #27632a;
+    }
 
     .clear-btn {
         background-color: wheat;
@@ -96,9 +96,9 @@
         cursor: pointer;
     }
 
-        .clear-btn:hover {
-            background-color: white;
-        }
+    .clear-btn:hover {
+        background-color: white;
+    }
 
     .empty-message {
         text-align: center;
@@ -132,9 +132,9 @@
         cursor: pointer;
     }
 
-        .qty-btn:hover {
-            background-color: #81c784;
-        }
+    .qty-btn:hover {
+        background-color: #81c784;
+    }
 
     .qty-display {
         min-width: 40px;
@@ -153,52 +153,50 @@
         font-weight: 700;
     }
 
-    /* === Scrollable Recent Orders (show scrollbar only if >3) === */
+    /* === Scrollable Recent Orders (show scrollbar only if more than 4 rows) === */
     .recent-orders {
-        max-height: 300px;
-        overflow-y: auto;
         border: 1px solid #c8e6c9;
         border-radius: 8px;
         background-color: #fff;
         margin-top: 10px;
     }
 
-        .recent-orders table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+    .recent-orders table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-        .recent-orders th, .recent-orders td {
-            border: 1px solid #ddd;
-            padding: 12px 10px;
-            text-align: left;
-            font-size: 15px;
-        }
+    .recent-orders th, .recent-orders td {
+        border: 1px solid #ddd;
+        padding: 12px 10px;
+        text-align: left;
+        font-size: 15px;
+    }
 
-        .recent-orders th {
-            background-color: #a5d6a7;
-            color: #1b5e20;
-            position: sticky;
-            top: 0;
-            z-index: 1;
-        }
+    .recent-orders th {
+        background-color: #a5d6a7;
+        color: #1b5e20;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
 
-        .recent-orders tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
+    .recent-orders tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
 
-        .recent-orders::-webkit-scrollbar {
-            width: 8px;
-        }
+    .recent-orders::-webkit-scrollbar {
+        width: 8px;
+    }
 
-        .recent-orders::-webkit-scrollbar-thumb {
-            background: #a5d6a7;
-            border-radius: 4px;
-        }
+    .recent-orders::-webkit-scrollbar-thumb {
+        background: #a5d6a7;
+        border-radius: 4px;
+    }
 
-            .recent-orders::-webkit-scrollbar-thumb:hover {
-                background: #81c784;
-            }
+    .recent-orders::-webkit-scrollbar-thumb:hover {
+        background: #81c784;
+    }
 </style>
 
 <div class="cart-card">
@@ -273,11 +271,20 @@
         </div>
     }
 
+    @* === Recent Paid Orders Section === *@
     @if (Model.RecentPaidOrders.Any())
     {
         <hr />
         <h3>🧾 Recent Orders</h3>
-        <div class="recent-orders">
+
+        // Count total order items
+        var totalItems = Model.RecentPaidOrders.Sum(o => o.OrderItems.Count);
+
+        // Each row approx height ~50px, 4 rows visible before scrolling
+        var maxHeight = 4 * 50; // 200px
+        var scrollStyle = totalItems >= 5 ? $"max-height:{maxHeight}px; overflow-y:auto;" : "overflow:visible;";
+
+        <div class="recent-orders" style="@scrollStyle">
             <table>
                 <thead>
                     <tr>
@@ -310,4 +317,5 @@
             </table>
         </div>
     }
+
 </div>

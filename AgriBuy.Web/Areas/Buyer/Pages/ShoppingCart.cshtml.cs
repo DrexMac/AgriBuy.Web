@@ -141,8 +141,8 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
                 values: new { area = "Buyer" },
                 protocol: Request.Scheme);
 
-            var successUrl = new Uri(successUrlString);
-            var failureUrl = new Uri(failureUrlString);
+            var successUrl = successUrlString is not null ? new Uri(successUrlString) : throw new InvalidOperationException("Success URL could not be generated.");
+            var failureUrl = failureUrlString is not null ? new Uri(failureUrlString) : throw new InvalidOperationException("Failure URL could not be generated.");
 
             var redirectUrl = await _checkoutService.CreateCheckoutAndGetRedirectUrlAsync(
                 userId,
