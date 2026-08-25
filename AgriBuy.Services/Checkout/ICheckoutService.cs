@@ -7,25 +7,38 @@ namespace AgriBuy.Services.Checkout
     public interface ICheckoutService
     {
         /// <summary>
-        /// Creates an Order from the user's ShoppingCart and returns a PayMaya checkout URL.
+        /// Creates an Order from the user's ShoppingCart and returns a PayMongo checkout URL.
         /// </summary>
         Task<string> CreateCheckoutAndGetRedirectUrlAsync(
             Guid userId,
             Uri successUrl,
-            Uri failureUrl,
+            Uri cancelUrl,
             CancellationToken ct = default);
 
         /// <summary>
-        /// Handles PayMaya webhook callback (success/failure) and updates Order status.
+        /// Handles a verified PayMongo webhook event and updates Order status.
         /// </summary>
         Task HandlePaymentNotificationAsync(PaymentNotificationDto notification, CancellationToken ct = default);
     }
 
     public class PaymentNotificationDto
     {
-        public string? CheckoutId { get; set; }
-        public string? RequestReferenceNumber { get; set; }
-        public string? Status { get; set; }
+        /// <summary>
+        /// PayMongo Checkout Session ID (e.g. cs_xxx). This is what we stored on the Order
+        /// when the checkout session was created, so it's how we match the event back to Orders.
+        /// </summary>
+        public string? CheckoutSessionId { get; set; }
+
+        /// <summary>
+        /// The event's reference_number, if PayMongo returned one on the checkout session/payment.
+        /// </summary>
+        public string? ReferenceNumber { get; set; }
+
+        /// <summary>
+        /// The PayMongo event type, e.g. "checkout_session.payment.paid", "payment.paid", "payment.failed".
+        /// </summary>
+        public string? EventType { get; set; }
+
         public string? RawPayload { get; set; }
     }
-}
+}

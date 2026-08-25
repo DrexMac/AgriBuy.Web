@@ -25,6 +25,8 @@ namespace AgriBuy.Services.Checkout
         private readonly IConfiguration _config;
         private readonly ILogger<CheckoutService> _logger;
 
+        private const string PayMongoCheckoutSessionsEndpoint = "https://api.paymongo.com/v1/checkout_sessions";
+
         public CheckoutService(
             IShoppingCartService cartService,
             IOrderService orderService,
@@ -46,7 +48,7 @@ namespace AgriBuy.Services.Checkout
         public async Task<string> CreateCheckoutAndGetRedirectUrlAsync(
             Guid userId,
             Uri successUrl,
-            Uri failureUrl,
+            Uri cancelUrl,
             CancellationToken ct = default)
         {
             var cartItems = (await _cartService.GetByUserIdAsync(userId)).ToList();
@@ -62,6 +64,9 @@ namespace AgriBuy.Services.Checkout
                 enriched.Add((ci, prod));
             }
 
+            // Keep splitting Orders by store the same way as before — PayMongo doesn't split
+            // payments by store, so all stores' items go into a single Checkout Session, and
+            // every resulting Order is tagged with that one session's ID.
             var groups = enriched.GroupBy(x => x.Product.StoreId).ToList();
             decimal grandTotal = 0;
             var createdOrders = new List<OrderDto>();
@@ -103,88 +108,74 @@ namespace AgriBuy.Services.Checkout
                 createdOrders.Add(orderDto);
             }
 
-            var webhookUrl = "https://localhost:7003/Buyer/Checkouts?handler=Notify";
+            var secretKey = _config["PayMongo:SecretKey"];
+            if (string.IsNullOrWhiteSpace(secretKey))
+                throw new InvalidOperationException("PayMongo secret key is missing.");
+
+            // PayMongo amounts are integers in the smallest currency unit (centavos for PHP).
+            static long ToCentavos(decimal value) => (long)Math.Round(value * 100m, MidpointRounding.AwayFromZero);
+
+            var lineItems = enriched.Select(x => new
+            {
+                currency = "PHP",
+                amount = ToCentavos(x.Cart.UnitPrice),
+                name = x.Product.Name ?? x.Cart.ProductName,
+                quantity = x.Cart.Quantity
+            }).ToArray();
 
             var payload = new
             {
-                totalAmount = new { value = grandTotal.ToString("0.00"), currency = "PHP" },
-                requestReferenceNumber = $"ORDS-{DateTime.UtcNow:yyyyMMddHHmmss}",
-                buyer = new { firstName = "Buyer" },
-                items = enriched.Select(x => new
+                data = new
                 {
-                    name = x.Product.Name ?? x.Cart.ProductName,
-                    quantity = x.Cart.Quantity,
-                    amount = new { value = x.Cart.UnitPrice.ToString("0.00") },
-                    totalAmount = new { value = (x.Cart.UnitPrice * x.Cart.Quantity).ToString("0.00") }
-                }),
-                redirectUrl = new
-                {
-                    success = successUrl.ToString(),
-                    failure = failureUrl.ToString(),
-                    cancel = failureUrl.ToString()
-                },
-                webhookUrl = webhookUrl
+                    attributes = new
+                    {
+                        send_email_receipt = false,
+                        show_description = true,
+                        show_line_items = true,
+                        description = "AgriBuy order",
+                        line_items = lineItems,
+                        // Adjust to whatever payment methods are enabled on your PayMongo account.
+                        payment_method_types = new[] { "card", "gcash", "paymaya", "grab_pay" },
+                        success_url = successUrl.ToString(),
+                        cancel_url = cancelUrl.ToString(),
+                        reference_number = $"ORDS-{DateTime.UtcNow:yyyyMMddHHmmss}"
+                    }
+                }
             };
 
-            string checkoutUrl = successUrl.ToString();
-            string? checkoutId = null;
-
-            var isSandbox = !string.IsNullOrWhiteSpace(_config["Maya:SandboxEndpoint"]);
-            var endpoint = isSandbox ? _config["Maya:SandboxEndpoint"] : _config["Maya:Endpoint"];
-            var apiKey = isSandbox ? _config["Maya:SandboxPublicKey"] : _config["Maya:PublicKey"];
-
-            if (string.IsNullOrWhiteSpace(endpoint) || string.IsNullOrWhiteSpace(apiKey))
+            var client = _httpFactory.CreateClient();
+            var req = new HttpRequestMessage(HttpMethod.Post, PayMongoCheckoutSessionsEndpoint)
             {
-                throw new InvalidOperationException("Maya endpoint or API key is missing.");
+                Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json")
+            };
+
+            // PayMongo uses HTTP Basic auth with the secret key as the username and an empty password.
+            var encodedKey = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{secretKey}:"));
+            req.Headers.Authorization = new AuthenticationHeaderValue("Basic", encodedKey);
+
+            var resp = await client.SendAsync(req, ct);
+            var body = await resp.Content.ReadAsStringAsync(ct);
+
+            if (!resp.IsSuccessStatusCode)
+            {
+                _logger.LogError("PayMongo checkout session creation failed: {Status} {Body}", resp.StatusCode, body);
+                throw new Exception("Payment provider error.");
             }
 
-            if (isSandbox)
-            {
-                // Simulate Sandbox checkout
-                checkoutId = $"SANDBOX-{Guid.NewGuid():N}";
-                _logger.LogInformation("Sandbox checkout created: {CheckoutId}", checkoutId);
+            using var doc = JsonDocument.Parse(body);
+            var data = doc.RootElement.GetProperty("data");
+            var checkoutSessionId = data.GetProperty("id").GetString();
+            var attributes = data.GetProperty("attributes");
+            var checkoutUrl = attributes.GetProperty("checkout_url").GetString()
+                ?? throw new Exception("PayMongo response did not include a checkout_url.");
 
-                await HandlePaymentNotificationAsync(new PaymentNotificationDto
-                {
-                    CheckoutId = checkoutId,
-                    Status = "SUCCESS"
-                });
-
-                checkoutUrl = successUrl.ToString();
-            }
-            else
-            {
-                var client = _httpFactory.CreateClient();
-                var req = new HttpRequestMessage(HttpMethod.Post, endpoint)
-                {
-                    Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json")
-                };
-
-                var encodedKey = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{apiKey}:"));
-                req.Headers.Authorization = new AuthenticationHeaderValue("Basic", encodedKey);
-
-                var resp = await client.SendAsync(req, ct);
-                var body = await resp.Content.ReadAsStringAsync(ct);
-
-                if (!resp.IsSuccessStatusCode)
-                {
-                    _logger.LogError("PayMaya checkout failed: {Status} {Body}", resp.StatusCode, body);
-                    throw new Exception("Payment provider error.");
-                }
-
-                using var doc = JsonDocument.Parse(body);
-                if (doc.RootElement.TryGetProperty("redirectUrl", out var redirectUrlProp))
-                    checkoutUrl = redirectUrlProp.GetString() ?? checkoutUrl;
-                if (doc.RootElement.TryGetProperty("id", out var idProp))
-                    checkoutId = idProp.GetString();
-            }
-
-            // Update orders with checkout ID
+            // Tag every order created for this cart with the Checkout Session ID so the webhook
+            // can match the event back to these orders.
             foreach (var o in createdOrders)
             {
                 try
                 {
-                    o.ORNumber = checkoutId;
+                    o.ORNumber = checkoutSessionId;
                     await _orderService.DetachedUpdateAsync(o);
                 }
                 catch (Exception ex)
@@ -200,59 +191,52 @@ namespace AgriBuy.Services.Checkout
         {
             if (notification == null) return;
 
+            // We only act on the checkout-session-level success event. PayMongo checkout sessions
+            // don't push a distinct "failed" webhook the way PayMaya did — a customer who cancels
+            // or fails to pay is simply redirected back to cancel_url, and no stock was ever
+            // reserved for the unpaid order, so there's nothing to roll back here.
+            var isCheckoutSuccess = string.Equals(
+                notification.EventType,
+                "checkout_session.payment.paid",
+                StringComparison.OrdinalIgnoreCase);
+
+            if (!isCheckoutSuccess || string.IsNullOrWhiteSpace(notification.CheckoutSessionId))
+            {
+                _logger.LogInformation("Ignoring PayMongo event {EventType}", notification.EventType);
+                return;
+            }
+
             var orders = await _orderService.GetAllAsync();
-            var matched = orders.Where(o =>
-                o.ORNumber == notification.CheckoutId ||
-                o.OrderNumber == notification.RequestReferenceNumber).ToList();
+            var matched = orders.Where(o => o.ORNumber == notification.CheckoutSessionId).ToList();
 
-            if (!matched.Any()) return;
-
-            var success = (notification.Status ?? "").ToUpperInvariant().Contains("SUCCESS");
-
-            if (success)
+            if (!matched.Any())
             {
-                foreach (var order in matched)
-                {
-                    order.IsPaid = true;
-                    order.PayDate = DateTime.UtcNow;
-                    await _orderService.DetachedUpdateAsync(order);
+                _logger.LogWarning("No orders matched PayMongo checkout session {CheckoutSessionId}", notification.CheckoutSessionId);
+                return;
+            }
 
-                    var items = await _orderItemService.GetByOrderIdAsync(order.Id);
-                    foreach (var item in items)
+            foreach (var order in matched)
+            {
+                if (order.IsPaid) continue; // idempotency: PayMongo may retry webhook delivery
+
+                order.IsPaid = true;
+                order.PayDate = DateTime.UtcNow;
+                await _orderService.DetachedUpdateAsync(order);
+
+                var items = await _orderItemService.GetByOrderIdAsync(order.Id);
+                foreach (var item in items)
+                {
+                    var product = await _productService.GetByIdAsync(item.ProductId);
+                    if (product != null && product.Quantity >= item.Quantity)
                     {
-                        var product = await _productService.GetByIdAsync(item.ProductId);
-                        if (product != null && product.Quantity >= item.Quantity)
-                        {
-                            product.Quantity -= item.Quantity;
-                            await _productService.UpdateAsync(product);
-                        }
+                        product.Quantity -= item.Quantity;
+                        await _productService.UpdateAsync(product);
                     }
                 }
-
-                var userId = matched.First().UserId;
-                await _cartService.ClearCartAsync(userId);
             }
-            else
-            {
-                foreach (var order in matched)
-                {
-                    var items = await _orderItemService.GetByOrderIdAsync(order.Id);
-                    foreach (var item in items)
-                    {
-                        var product = await _productService.GetByIdAsync(item.ProductId);
-                        if (product != null)
-                        {
-                            product.Quantity += item.Quantity;
-                            await _productService.UpdateAsync(product);
-                        }
-                    }
 
-                    order.IsPaid = false;
-                    await _orderService.DetachedUpdateAsync(order);
-                }
-            }
+            var userId = matched.First().UserId;
+            await _cartService.ClearCartAsync(userId);
         }
     }
-
-    
 }

@@ -135,26 +135,22 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
                 values: new { area = "Buyer" },
                 protocol: Request.Scheme);
 
-            var failureUrlString = Url.Page(
+            // PayMongo calls this "cancel_url" rather than "failure_url": it's where the customer
+            // lands if they cancel or the payment doesn't go through on the hosted checkout page.
+            var cancelUrlString = Url.Page(
                 "/Cart/Failed",
                 pageHandler: null,
                 values: new { area = "Buyer" },
                 protocol: Request.Scheme);
 
             var successUrl = successUrlString is not null ? new Uri(successUrlString) : throw new InvalidOperationException("Success URL could not be generated.");
-            var failureUrl = failureUrlString is not null ? new Uri(failureUrlString) : throw new InvalidOperationException("Failure URL could not be generated.");
+            var cancelUrl = cancelUrlString is not null ? new Uri(cancelUrlString) : throw new InvalidOperationException("Cancel URL could not be generated.");
 
             var redirectUrl = await _checkoutService.CreateCheckoutAndGetRedirectUrlAsync(
                 userId,
                 successUrl,
-                failureUrl
+                cancelUrl
             );
-
-            if (redirectUrl.Contains("Success", StringComparison.OrdinalIgnoreCase))
-            {
-                await _shoppingCartService.ClearCartAsync(userId);
-                return RedirectToPage("/ShoppingCart", new { area = "Buyer" });
-            }
 
             return Redirect(redirectUrl);
         }

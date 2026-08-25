@@ -40,7 +40,7 @@ namespace AgriBuy.Web.Areas.Seller.Pages.Stores
                 return RedirectToPage("/Stores/Details", new { storeid = store.Id });
             }
 
-            // pag wala o na delete
+            // pag wala o na delete     
             Stores = new List<Store>();
             return Page();
         }
