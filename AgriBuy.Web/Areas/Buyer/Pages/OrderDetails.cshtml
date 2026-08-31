@@ -18,7 +18,7 @@
 
     .orders-card {
         width: 95%;
-        max-width: 1000px;
+        max-width: 900px;
         background-color: rgba(244, 248, 237, 0.95);
         padding: 30px;
         border-radius: 12px;
@@ -35,42 +35,76 @@
         margin-bottom: 10px;
     }
 
-    .table-container {
-        max-height: 400px;
-        overflow-y: auto;
+    .order-box {
+        background: #fff;
         border: 1px solid #c8e6c9;
-        border-radius: 8px;
-        background-color: #fff;
+        border-radius: 10px;
+        padding: 18px 20px;
+    }
+
+    .order-box-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+    }
+
+    .order-number {
+        font-weight: 700;
+        color: #33691e;
+        font-size: 16px;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 14px;
+        font-size: 13px;
+        font-weight: 700;
+        background-color: #c8e6c9;
+        color: #1b5e20;
+    }
+
+    .status-Cancelled {
+        background-color: #ffcdd2;
+        color: #b71c1c;
+    }
+
+    .status-Delivered {
+        background-color: #a5d6a7;
+        color: #1b5e20;
     }
 
     table {
         width: 100%;
         border-collapse: collapse;
-        min-width: 700px;
+        margin-top: 10px;
     }
 
     th, td {
         border: 1px solid #ddd;
-        padding: 12px 10px;
+        padding: 8px 10px;
         text-align: left;
-        font-size: 15px;
+        font-size: 14px;
     }
 
     th {
         background-color: #a5d6a7;
         color: #1b5e20;
-        position: sticky;
-        top: 0;
-        z-index: 1;
     }
 
-    tr:nth-child(even) {
-        background-color: #f9f9f9;
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px 20px;
+        margin-top: 10px;
+        font-size: 14px;
+        color: #444;
     }
 
-    .paid {
-        color: #2e7d32;
-        font-weight: bold;
+    .info-grid strong {
+        color: #33691e;
     }
 
     .no-orders {
@@ -79,19 +113,6 @@
         color: #666;
         font-weight: 500;
     }
-
-    .table-container::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    .table-container::-webkit-scrollbar-thumb {
-        background: #a5d6a7;
-        border-radius: 4px;
-    }
-
-        .table-container::-webkit-scrollbar-thumb:hover {
-            background: #81c784;
-        }
 
     .back-link {
         background-color: #2e7d32;
@@ -104,9 +125,9 @@
         transition: background-color 0.2s;
     }
 
-        .back-link:hover {
-            background-color: #27632a;
-        }
+    .back-link:hover {
+        background-color: #27632a;
+    }
 </style>
 
 <div class="orders-card">
@@ -119,37 +140,51 @@
     }
     else
     {
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>OR Number</th>
-                        <th>Product</th>
-                        <th>Quantity</th>
-                        <th>Unit Price</th>
-                        <th>Total</th>
-                        <th>Pay Date</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var order in Model.Orders)
-                    {
-                        foreach (var item in order.OrderItems)
+        @foreach (var order in Model.Orders)
+        {
+            <div class="order-box">
+                <div class="order-box-header">
+                    <div class="order-number">Order #@order.OrderNumber</div>
+                    <span class="status-badge status-@order.Status">@order.Status</span>
+                </div>
+
+                <div class="info-grid">
+                    <div><strong>Order Date:</strong> @order.OrderDate.ToString("MMM dd, yyyy")</div>
+                    <div><strong>Pay Date:</strong> @order.PayDate?.ToString("MMM dd, yyyy hh:mm tt")</div>
+                    <div><strong>Estimated Delivery:</strong> @order.EstimatedDeliveryDate?.ToString("MMM dd, yyyy")</div>
+                    <div><strong>Total:</strong> ₱ @order.TotalPrice.ToString("N2")</div>
+                </div>
+
+                <div class="info-grid">
+                    <div>
+                        <strong>Ship To:</strong> @order.ShippingFullName<br />
+                        @order.ShippingPhoneNumber<br />
+                        @order.ShippingAddress, @order.ShippingCityProvince @order.ShippingPostalCode
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in order.OrderItems)
                         {
                             <tr>
-                                <td>@order.ORNumber</td>
                                 <td>@item.Product?.Name</td>
                                 <td>@item.Quantity</td>
                                 <td>₱ @item.UnitPrice.ToString("N2")</td>
                                 <td>₱ @((item.Quantity * item.UnitPrice).ToString("N2"))</td>
-                                <td>@order.PayDate?.ToString("MMM dd, yyyy hh:mm tt")</td>
-                                <td class="paid">Delivered</td>
                             </tr>
                         }
-                    }
-                </tbody>
-            </table>
-        </div>
+                    </tbody>
+                </table>
+            </div>
+        }
     }
 </div>

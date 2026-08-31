@@ -362,3 +362,10 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /AgriBuy.Web/wwwroot/products
+
+# Configuration files with secrets
+appsettings.json
+appsettings.*.json
+secrets.json
+.secrets/
+.user-secrets/

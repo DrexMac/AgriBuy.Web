@@ -17,8 +17,8 @@
     }
 
     .orders-card {
-        width: 90%;
-        max-width: 1000px;
+        width: 95%;
+        max-width: 1100px;
         background-color: rgba(244, 248, 237, 0.95);
         padding: 30px;
         border-radius: 12px;
@@ -36,7 +36,7 @@
     }
 
     .table-container {
-        max-height: 300px; 
+        max-height: 500px;
         overflow-y: auto;
         border: 1px solid #c8e6c9;
         border-radius: 8px;
@@ -46,14 +46,15 @@
     table {
         width: 100%;
         border-collapse: collapse;
-        min-width: 600px;
+        min-width: 700px;
     }
 
     th, td {
         border: 1px solid #ddd;
         padding: 12px 10px;
         text-align: left;
-        font-size: 15px;
+        font-size: 14px;
+        vertical-align: top;
     }
 
     th {
@@ -73,39 +74,43 @@
         font-weight: bold;
     }
 
-    .shipping-section {
-        margin-top: 10px;
-        background-color: #f1f8e9;
-        border: 1px solid #c5e1a5;
-        padding: 15px;
-        border-radius: 8px;
-        color: #33691e;
-    }
-
-        .shipping-section h2 {
-            font-size: 18px;
-            margin-bottom: 8px;
-        }
-
     .no-orders {
         text-align: center;
         padding: 20px;
         color: #666;
     }
 
-    /* Scrollbar styling (for modern browsers) */
-    .table-container::-webkit-scrollbar {
-        width: 8px;
+    .status-form {
+        display: flex;
+        gap: 6px;
+        align-items: center;
     }
 
-    .table-container::-webkit-scrollbar-thumb {
-        background: #a5d6a7;
+    .status-form select {
+        padding: 5px;
         border-radius: 4px;
+        border: 1px solid #a5d6a7;
+        font-size: 13px;
     }
 
-        .table-container::-webkit-scrollbar-thumb:hover {
-            background: #81c784;
-        }
+    .status-form button {
+        background-color: #2e7d32;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+    }
+
+    .status-form button:hover {
+        background-color: #27632a;
+    }
+
+    .shipping-cell {
+        font-size: 12px;
+        line-height: 1.5;
+    }
 </style>
 
 <div class="orders-card">
@@ -123,8 +128,9 @@
                     <tr>
                         <th>Order #</th>
                         <th>Buyer</th>
+                        <th>Products</th>
                         <th>Total Price</th>
-                        <th>OR Number</th>
+                        <th>Shipping To</th>
                         <th>Pay Date</th>
                         <th>Status</th>
                     </tr>
@@ -135,10 +141,39 @@
                         <tr>
                             <td>@order.OrderNumber</td>
                             <td>@($"{order.User?.FirstName} {order.User?.LastName}")</td>
+                            <td>
+                                @foreach (var item in order.OrderItems)
+                                {
+                                    <div>@item.Product?.Name × @item.Quantity</div>
+                                }
+                            </td>
                             <td>₱ @order.TotalPrice.ToString("N2")</td>
-                            <td>@order.ORNumber</td>
+                            <td class="shipping-cell">
+                                <strong>@order.ShippingFullName</strong><br />
+                                @order.ShippingPhoneNumber<br />
+                                @order.ShippingAddress, @order.ShippingCityProvince @order.ShippingPostalCode
+                            </td>
                             <td>@order.PayDate?.ToString("MMM dd, yyyy hh:mm tt")</td>
-                            <td class="paid">COMPLETED</td>
+                            <td>
+                                <form method="post" asp-page-handler="UpdateStatus" class="status-form">
+                                    <input type="hidden" name="orderId" value="@order.Id" />
+                                    <input type="hidden" name="storeid" value="@Model.StoreId" />
+                                    <select name="newStatus">
+                                        @foreach (var s in Model.AllStatuses)
+                                        {
+                                            if (s == order.Status)
+                                            {
+                                                <option value="@s" selected>@s</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@s">@s</option>
+                                            }
+                                        }
+                                    </select>
+                                    <button type="submit">Update</button>
+                                </form>
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -146,9 +181,5 @@
         </div>
     }
 
-    <!-- Reserved Shipping Section -->
-    <div class="shipping-section">
-        <h2>🚚 Shipping Details (Coming Soon)</h2>
-        <p>This area will display shipment tracking and cash-on-delivery status.</p>
-    </div>
+    <a asp-area="Seller" asp-page="/Stores/Details" asp-route-storeid="@Model.StoreId" class="back-link" style="color:#2e7d32;font-weight:600;">← Back to Store</a>
 </div>

@@ -34,6 +34,17 @@ namespace AgriBuy.Web.Areas.Buyer.Pages.Cart
                 .OrderByDescending(o => o.PayDate)
                 .ToListAsync();
 
+            // ---- NEW: mark all as seen so the "Updated!" badge clears ----
+            var unseen = Orders.Where(o => !o.IsSeenByBuyer).ToList();
+            if (unseen.Any())
+            {
+                foreach (var o in unseen)
+                {
+                    o.IsSeenByBuyer = true;
+                }
+                await _context.SaveChangesAsync();
+            }
+
             return Page();
         }
     }

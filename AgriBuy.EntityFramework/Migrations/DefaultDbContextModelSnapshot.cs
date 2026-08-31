@@ -79,10 +79,16 @@ namespace AgriBuy.EntityFramework.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
+                    b.Property<DateTime?>("EstimatedDeliveryDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<DateTime?>("FulfillmentDate")
                         .HasColumnType("datetime(6)");
 
                     b.Property<bool>("IsPaid")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsSeenByBuyer")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("ORNumber")
@@ -100,6 +106,24 @@ namespace AgriBuy.EntityFramework.Migrations
 
                     b.Property<Guid?>("ProductId")
                         .HasColumnType("char(36)");
+
+                    b.Property<string>("ShippingAddress")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ShippingCityProvince")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ShippingFullName")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ShippingPhoneNumber")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ShippingPostalCode")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("StoreId")
                         .HasColumnType("char(36)");
@@ -388,7 +412,7 @@ namespace AgriBuy.EntityFramework.Migrations
                         .HasForeignKey("ProductId");
 
                     b.HasOne("AgriBuy.Models.Models.Store", "Store")
-                        .WithMany()
+                        .WithMany("Orders")
                         .HasForeignKey("StoreId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -498,6 +522,8 @@ namespace AgriBuy.EntityFramework.Migrations
 
             modelBuilder.Entity("AgriBuy.Models.Models.Store", b =>
                 {
+                    b.Navigation("Orders");
+
                     b.Navigation("Products");
                 });
 
