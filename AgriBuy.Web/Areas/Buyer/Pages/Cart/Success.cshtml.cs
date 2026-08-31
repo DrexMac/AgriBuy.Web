@@ -3,6 +3,7 @@ using AgriBuy.Models.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using AgriBuy.Models.Enums;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -39,6 +40,7 @@ namespace AgriBuy.Web.Areas.Buyer.Pages.Cart
                 // Mark as paid
                 latestOrder.IsPaid = true;
                 latestOrder.PayDate = DateTime.UtcNow;
+                latestOrder.Status = OrderStatus.Processing;
                 latestOrder.ORNumber = $"OR-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid().ToString()[..6]}";
 
                 // Deduct product stock

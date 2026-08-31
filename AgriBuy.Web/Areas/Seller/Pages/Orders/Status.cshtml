@@ -1,6 +1,8 @@
 ﻿@page
 @model AgriBuy.Web.Areas.Seller.Pages.Orders.StatusModel
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using AgriBuy.Models.Enums
+
 @{
     ViewData["Title"] = "Order Status";
 }
@@ -17,7 +19,7 @@
     }
 
     .orders-card {
-        width: 95%;
+        width: 90%;
         max-width: 1100px;
         background-color: rgba(244, 248, 237, 0.95);
         padding: 30px;
@@ -35,9 +37,31 @@
         font-weight: 700;
     }
 
+    /* ==============================
+           BACK TO STORE
+           ============================== */
+
+    .back-link {
+        align-self: flex-start;
+        text-decoration: none;
+        padding: 8px 14px;
+        border-radius: 8px;
+        background-color: #e8f5e9;
+        transition: background-color 0.2s;
+    }
+
+        .back-link:hover {
+            background-color: #c8e6c9;
+        }
+
+    /* ==============================
+           TABLE
+           ============================== */
+
     .table-container {
         max-height: 500px;
         overflow-y: auto;
+        overflow-x: auto;
         border: 1px solid #c8e6c9;
         border-radius: 8px;
         background-color: #fff;
@@ -46,15 +70,15 @@
     table {
         width: 100%;
         border-collapse: collapse;
-        min-width: 700px;
+        min-width: 850px;
     }
 
-    th, td {
+    th,
+    td {
         border: 1px solid #ddd;
         padding: 12px 10px;
         text-align: left;
-        font-size: 14px;
-        vertical-align: top;
+        font-size: 15px;
     }
 
     th {
@@ -69,117 +93,287 @@
         background-color: #f9f9f9;
     }
 
-    .paid {
-        color: #2e7d32;
-        font-weight: bold;
+    tr:hover {
+        background-color: #f1f8f1;
     }
+
+    /* ==============================
+           STATUS BADGES
+           ============================== */
+
+    .status-badge {
+        padding: 5px 11px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 13px;
+        display: inline-block;
+        white-space: nowrap;
+    }
+
+    .status-Pending {
+        background-color: #fff3cd;
+        color: #7a5b00;
+    }
+
+    .status-Processing {
+        background-color: #cfe2ff;
+        color: #084298;
+    }
+
+    .status-Shipped {
+        background-color: #e2d9f3;
+        color: #4b2e83;
+    }
+
+    .status-Delivered {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .status-Cancelled {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+
+    /* ==============================
+           STATUS FORM
+           ============================== */
+
+    .status-form {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+    }
+
+        .status-form select {
+            padding: 6px 8px;
+            border-radius: 5px;
+            border: 1px solid #c8e6c9;
+            background-color: white;
+            font-size: 13px;
+        }
+
+        .status-form button {
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+            .status-form button:hover {
+                background-color: #27632a;
+            }
+
+    /* ==============================
+           NO ORDERS
+           ============================== */
 
     .no-orders {
         text-align: center;
         padding: 20px;
         color: #666;
+        font-weight: 500;
     }
 
-    .status-form {
-        display: flex;
-        gap: 6px;
-        align-items: center;
+    /* ==============================
+           SCROLLBAR
+           ============================== */
+
+    .table-container::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
     }
 
-    .status-form select {
-        padding: 5px;
+    .table-container::-webkit-scrollbar-thumb {
+        background: #a5d6a7;
         border-radius: 4px;
-        border: 1px solid #a5d6a7;
-        font-size: 13px;
     }
 
-    .status-form button {
-        background-color: #2e7d32;
-        color: white;
-        border: none;
-        padding: 6px 12px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 13px;
-    }
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #81c784;
+        }
 
-    .status-form button:hover {
-        background-color: #27632a;
-    }
+    /* ==============================
+           MOBILE
+           ============================== */
 
-    .shipping-cell {
-        font-size: 12px;
-        line-height: 1.5;
+    @@media (max-width: 700px) {
+
+        body {
+            padding: 20px 0;
+        }
+
+        .orders-card {
+            width: 92%;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+        }
+
+        .back-link {
+            font-size: 14px;
+        }
     }
 </style>
 
+
 <div class="orders-card">
+
+    <!-- ==============================
+         BACK TO STORE
+         ============================== -->
+
+    <a asp-area="Seller"
+       asp-page="/Stores/Details"
+       asp-route-storeid="@Model.StoreId"
+       class="back-link"
+       style="color:#2e7d32;font-weight:600;">
+        ← Back to Store
+    </a>
+
+
+    <!-- ==============================
+         PAGE TITLE
+         ============================== -->
+
     <h1>🧾 Order Status</h1>
 
+
+    <!-- ==============================
+         ORDERS
+         ============================== -->
     @if (!Model.Orders.Any())
     {
-        <div class="no-orders">No orders found for this store.</div>
+        <div class="no-orders">
+            No orders found for this store.
+        </div>
     }
     else
     {
         <div class="table-container">
+
             <table>
+
                 <thead>
                     <tr>
                         <th>Order #</th>
                         <th>Buyer</th>
-                        <th>Products</th>
                         <th>Total Price</th>
-                        <th>Shipping To</th>
+                        <th>OR Number</th>
                         <th>Pay Date</th>
                         <th>Status</th>
+                        <th>Update Status</th>
                     </tr>
                 </thead>
+
                 <tbody>
+
                     @foreach (var order in Model.Orders)
                     {
                         <tr>
-                            <td>@order.OrderNumber</td>
-                            <td>@($"{order.User?.FirstName} {order.User?.LastName}")</td>
+
+                            <!-- ORDER NUMBER -->
                             <td>
-                                @foreach (var item in order.OrderItems)
+                                <strong>
+                                    @order.OrderNumber
+                                </strong>
+                            </td>
+
+
+                            <!-- BUYER -->
+                            <td>
+                                @($"{order.User?.FirstName} {order.User?.LastName}")
+                            </td>
+
+
+                            <!-- TOTAL PRICE -->
+                            <td>
+                                ₱ @order.TotalPrice.ToString("N2")
+                            </td>
+
+
+                            <!-- OR NUMBER -->
+                            <td>
+                                @if (!string.IsNullOrEmpty(order.ORNumber))
                                 {
-                                    <div>@item.Product?.Name × @item.Quantity</div>
+                                    @order.ORNumber
+                                }
+                                else
+                                {
+                                    <span>N/A</span>
                                 }
                             </td>
-                            <td>₱ @order.TotalPrice.ToString("N2")</td>
-                            <td class="shipping-cell">
-                                <strong>@order.ShippingFullName</strong><br />
-                                @order.ShippingPhoneNumber<br />
-                                @order.ShippingAddress, @order.ShippingCityProvince @order.ShippingPostalCode
-                            </td>
-                            <td>@order.PayDate?.ToString("MMM dd, yyyy hh:mm tt")</td>
+
+
+                            <!-- PAY DATE -->
                             <td>
-                                <form method="post" asp-page-handler="UpdateStatus" class="status-form">
-                                    <input type="hidden" name="orderId" value="@order.Id" />
-                                    <input type="hidden" name="storeid" value="@Model.StoreId" />
-                                    <select name="newStatus">
-                                        @foreach (var s in Model.AllStatuses)
-                                        {
-                                            if (s == order.Status)
-                                            {
-                                                <option value="@s" selected>@s</option>
-                                            }
-                                            else
-                                            {
-                                                <option value="@s">@s</option>
-                                            }
-                                        }
-                                    </select>
-                                    <button type="submit">Update</button>
-                                </form>
+                                @if (order.PayDate.HasValue)
+                                {
+                                    @order.PayDate.Value.ToString("MMM dd, yyyy hh:mm tt")
+                                }
+                                else
+                                {
+                                    <span>N/A</span>
+                                }
                             </td>
+
+
+                            <!-- CURRENT STATUS -->
+                            <td>
+                                <span class="status-badge status-@order.Status">
+                                    @order.Status
+                                </span>
+                            </td>
+
+
+                            <!-- UPDATE STATUS -->
+                            <td>
+
+                                <form method="post"
+                                      asp-page-handler="UpdateStatus"
+                                      class="status-form">
+
+                                    <input type="hidden"
+                                           name="orderId"
+                                           value="@order.Id" />
+
+                                    <input type="hidden"
+                                           name="storeid"
+                                           value="@order.StoreId" />
+
+                                    <select name="newStatus">
+
+                                        @foreach (OrderStatus statusOption in Enum.GetValues(typeof(OrderStatus)))
+                                        {
+                                            <option value="@statusOption"
+                                                    selected="@(statusOption == order.Status ? "selected" : null)">
+                                                @statusOption
+                                            </option>
+                                        }
+
+                                    </select>
+
+                                    <button type="submit">
+                                        Update
+                                    </button>
+
+                                </form>
+
+                            </td>
+
                         </tr>
                     }
+
                 </tbody>
+
             </table>
+
         </div>
     }
 
-    <a asp-area="Seller" asp-page="/Stores/Details" asp-route-storeid="@Model.StoreId" class="back-link" style="color:#2e7d32;font-weight:600;">← Back to Store</a>
 </div>

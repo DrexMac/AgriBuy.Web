@@ -9,11 +9,9 @@ namespace AgriBuy.Models.Enums
     public enum OrderStatus
     {
         Pending = 0,
-        Confirmed = 1,
-        Processing = 2,
-        Shipped = 3,
-        OutForDelivery = 4,
-        Delivered = 5,
-        Cancelled = 6
+        Processing = 1,
+        Shipped = 2,
+        Delivered = 3,
+        Cancelled = 4
     }
 }

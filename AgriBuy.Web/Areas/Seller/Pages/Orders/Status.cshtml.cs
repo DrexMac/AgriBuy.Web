@@ -22,14 +22,13 @@ namespace AgriBuy.Web.Areas.Seller.Pages.Orders
 
         public List<Order> Orders { get; set; } = new();
 
-        [BindProperty(SupportsGet = true)]
+        // Store ID used for the Back to Store button
         public Guid? StoreId { get; set; }
-
-        public List<OrderStatus> AllStatuses { get; set; } =
-            Enum.GetValues(typeof(OrderStatus)).Cast<OrderStatus>().ToList();
 
         public async Task OnGetAsync(Guid? storeid = null)
         {
+            // Keep the store ID so the page can navigate
+            // back to the correct store.
             StoreId = storeid;
 
             if (storeid == null)
@@ -39,29 +38,42 @@ namespace AgriBuy.Web.Areas.Seller.Pages.Orders
                 .Include(o => o.User)
                 .Include(o => o.OrderItems)
                     .ThenInclude(i => i.Product)
-                .Where(o => o.StoreId == storeid && o.IsPaid)
+                .Where(o =>
+                    o.StoreId == storeid &&
+                    o.IsPaid)
                 .OrderByDescending(o => o.PayDate)
                 .ToListAsync();
         }
 
-        // ---- NEW: seller updates the order status ----
-        public async Task<IActionResult> OnPostUpdateStatusAsync(Guid orderId, OrderStatus newStatus, Guid storeid)
+        public async Task<IActionResult> OnPostUpdateStatusAsync(
+            Guid orderId,
+            OrderStatus newStatus,
+            Guid storeid)
         {
-            var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == orderId);
-            if (order != null)
+            var order = await _context.Orders
+                .FirstOrDefaultAsync(o =>
+                    o.Id == orderId &&
+                    o.StoreId == storeid);
+
+            if (order == null)
             {
-                order.Status = newStatus;
-
-                // Mark as "not seen" so the buyer gets an "Updated!" badge
-                order.IsSeenByBuyer = false;
-
-                if (newStatus == OrderStatus.Delivered)
-                {
-                    order.FulfillmentDate = DateTime.UtcNow;
-                }
-
-                await _context.SaveChangesAsync();
+                return RedirectToPage(new { storeid });
             }
+
+            // Update order status
+            order.Status = newStatus;
+
+            // Set fulfillment date when delivered
+            if (newStatus == OrderStatus.Delivered)
+            {
+                order.FulfillmentDate = DateTime.UtcNow;
+            }
+            else
+            {
+                order.FulfillmentDate = null;
+            }
+
+            await _context.SaveChangesAsync();
 
             return RedirectToPage(new { storeid });
         }

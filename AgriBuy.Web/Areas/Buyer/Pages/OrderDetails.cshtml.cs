@@ -23,27 +23,23 @@ namespace AgriBuy.Web.Areas.Buyer.Pages.Cart
 
         public async Task<IActionResult> OnGetAsync()
         {
+            // Get logged-in buyer
             var userIdStr = HttpContext.Session.GetString("UserId");
-            if (!Guid.TryParse(userIdStr, out var userId))
-                return RedirectToPage("/Accounts/Login");
 
+            if (!Guid.TryParse(userIdStr, out var userId))
+            {
+                return RedirectToPage("/Accounts/Login");
+            }
+
+            // Load all paid orders belonging to this buyer
             Orders = await _context.Orders
                 .Include(o => o.OrderItems)
                     .ThenInclude(i => i.Product)
-                .Where(o => o.UserId == userId && o.IsPaid)
+                .Where(o =>
+                    o.UserId == userId &&
+                    o.IsPaid)
                 .OrderByDescending(o => o.PayDate)
                 .ToListAsync();
-
-            // ---- NEW: mark all as seen so the "Updated!" badge clears ----
-            var unseen = Orders.Where(o => !o.IsSeenByBuyer).ToList();
-            if (unseen.Any())
-            {
-                foreach (var o in unseen)
-                {
-                    o.IsSeenByBuyer = true;
-                }
-                await _context.SaveChangesAsync();
-            }
 
             return Page();
         }

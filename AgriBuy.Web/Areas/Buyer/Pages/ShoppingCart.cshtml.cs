@@ -19,7 +19,10 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
         private readonly ICheckoutService _checkoutService;
         private readonly DefaultDbContext _context;
 
-        public ShoppingCartModel(IShoppingCartService shoppingCartService, ICheckoutService checkoutService, DefaultDbContext context)
+        public ShoppingCartModel(
+            IShoppingCartService shoppingCartService,
+            ICheckoutService checkoutService,
+            DefaultDbContext context)
         {
             _shoppingCartService = shoppingCartService;
             _checkoutService = checkoutService;
@@ -27,18 +30,26 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
         }
 
         public List<ShoppingCartDto> CartItems { get; set; } = new();
+
         public decimal OrderTotal { get; set; }
+
         public List<Order> RecentPaidOrders { get; set; } = new();
+
 
         private Guid GetCurrentUserId()
         {
             var userIdStr = HttpContext.Session.GetString("UserId");
-            return Guid.TryParse(userIdStr, out var userId) ? userId : Guid.Empty;
+
+            return Guid.TryParse(userIdStr, out var userId)
+                ? userId
+                : Guid.Empty;
         }
+
 
         private async Task LoadCartAsync()
         {
             var userId = GetCurrentUserId();
+
             if (userId == Guid.Empty)
             {
                 CartItems = new();
@@ -46,17 +57,25 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
                 return;
             }
 
-            CartItems = (await _shoppingCartService.GetByUserIdAsync(userId)).ToList();
+            CartItems = (await _shoppingCartService
+                .GetByUserIdAsync(userId))
+                .ToList();
+
             OrderTotal = CartItems.Sum(x => x.ItemPrice);
         }
+
 
         private async Task LoadRecentPaidOrdersAsync()
         {
             var userId = GetCurrentUserId();
-            if (userId == Guid.Empty) return;
+
+            if (userId == Guid.Empty)
+                return;
 
             RecentPaidOrders = await _context.Orders
-                .Where(o => o.UserId == userId && o.IsPaid)
+                .Where(o =>
+                    o.UserId == userId &&
+                    o.IsPaid)
                 .Include(o => o.OrderItems)
                     .ThenInclude(i => i.Product)
                 .OrderByDescending(o => o.PayDate)
@@ -64,70 +83,106 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
                 .ToListAsync();
         }
 
+
         public async Task<IActionResult> OnGetAsync()
         {
             await LoadCartAsync();
+
             await LoadRecentPaidOrdersAsync();
+
             return Page();
         }
+
 
         public async Task<IActionResult> OnPostRemoveAsync(Guid cartItemId)
         {
             await _shoppingCartService.DeleteAsync(cartItemId);
+
             await LoadCartAsync();
             await LoadRecentPaidOrdersAsync();
+
             return Page();
         }
+
 
         public async Task<IActionResult> OnPostIncreaseAsync(Guid cartItemId)
         {
             await LoadCartAsync();
-            var item = CartItems.FirstOrDefault(c => c.Id == cartItemId);
+
+            var item = CartItems
+                .FirstOrDefault(c => c.Id == cartItemId);
+
             if (item != null)
             {
                 item.Quantity++;
-                item.ItemPrice = item.Quantity * item.UnitPrice;
+
+                item.ItemPrice =
+                    item.Quantity * item.UnitPrice;
+
                 await _shoppingCartService.UpdateAsync(item);
             }
+
             await LoadCartAsync();
             await LoadRecentPaidOrdersAsync();
+
             return Page();
         }
+
 
         public async Task<IActionResult> OnPostDecreaseAsync(Guid cartItemId)
         {
             await LoadCartAsync();
-            var item = CartItems.FirstOrDefault(c => c.Id == cartItemId);
+
+            var item = CartItems
+                .FirstOrDefault(c => c.Id == cartItemId);
+
             if (item != null)
             {
                 if (item.Quantity <= 1)
-                    await _shoppingCartService.DeleteAsync(cartItemId);
+                {
+                    await _shoppingCartService
+                        .DeleteAsync(cartItemId);
+                }
                 else
                 {
                     item.Quantity--;
-                    item.ItemPrice = item.Quantity * item.UnitPrice;
-                    await _shoppingCartService.UpdateAsync(item);
+
+                    item.ItemPrice =
+                        item.Quantity * item.UnitPrice;
+
+                    await _shoppingCartService
+                        .UpdateAsync(item);
                 }
             }
+
             await LoadCartAsync();
             await LoadRecentPaidOrdersAsync();
+
             return Page();
         }
+
 
         public async Task<IActionResult> OnPostClearAsync()
         {
             var userId = GetCurrentUserId();
-            await _shoppingCartService.ClearCartAsync(userId);
+
+            await _shoppingCartService
+                .ClearCartAsync(userId);
+
             await LoadCartAsync();
             await LoadRecentPaidOrdersAsync();
+
             return Page();
         }
+
 
         public async Task<IActionResult> OnPostCheckoutAsync()
         {
             var userId = GetCurrentUserId();
+
             if (userId == Guid.Empty)
                 return RedirectToPage("/Login");
+
 
             var successUrlString = Url.Page(
                 "/Cart/Success",
@@ -135,22 +190,33 @@ namespace AgriBuy.Web.Areas.Buyer.Pages
                 values: new { area = "Buyer" },
                 protocol: Request.Scheme);
 
-            // PayMongo calls this "cancel_url" rather than "failure_url": it's where the customer
-            // lands if they cancel or the payment doesn't go through on the hosted checkout page.
+
             var cancelUrlString = Url.Page(
                 "/Cart/Failed",
                 pageHandler: null,
                 values: new { area = "Buyer" },
                 protocol: Request.Scheme);
 
-            var successUrl = successUrlString is not null ? new Uri(successUrlString) : throw new InvalidOperationException("Success URL could not be generated.");
-            var cancelUrl = cancelUrlString is not null ? new Uri(cancelUrlString) : throw new InvalidOperationException("Cancel URL could not be generated.");
 
-            var redirectUrl = await _checkoutService.CreateCheckoutAndGetRedirectUrlAsync(
-                userId,
-                successUrl,
-                cancelUrl
-            );
+            var successUrl = successUrlString is not null
+                ? new Uri(successUrlString)
+                : throw new InvalidOperationException(
+                    "Success URL could not be generated.");
+
+
+            var cancelUrl = cancelUrlString is not null
+                ? new Uri(cancelUrlString)
+                : throw new InvalidOperationException(
+                    "Cancel URL could not be generated.");
+
+
+            var redirectUrl =
+                await _checkoutService
+                    .CreateCheckoutAndGetRedirectUrlAsync(
+                        userId,
+                        successUrl,
+                        cancelUrl);
+
 
             return Redirect(redirectUrl);
         }

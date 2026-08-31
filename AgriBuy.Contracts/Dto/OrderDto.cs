@@ -20,17 +20,7 @@ namespace AgriBuy.Contracts.Dto
         public DateTime OrderDate { get; set; }
         public DateTime? PayDate { get; set; }
         public DateTime? FulfillmentDate { get; set; }
-        public List<OrderItemDto>? OrderItems { get; set; }
-
-        // ---- NEW ----
-        public string? ShippingFullName { get; set; }
-        public string? ShippingPhoneNumber { get; set; }
-        public string? ShippingAddress { get; set; }
-        public string? ShippingCityProvince { get; set; }
-        public string? ShippingPostalCode { get; set; }
-
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
-        public DateTime? EstimatedDeliveryDate { get; set; }
-        public bool IsSeenByBuyer { get; set; } = true;
+        public List<OrderItemDto>? OrderItems { get; set; }
     }
 }

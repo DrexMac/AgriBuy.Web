@@ -21,20 +21,10 @@ namespace AgriBuy.Models.Models
         public DateTime OrderDate { get; set; }
         public DateTime? PayDate { get; set; }
         public DateTime? FulfillmentDate { get; set; }
-        public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
-        // ---- NEW: Shipping & order tracking ----
-        public string? ShippingFullName { get; set; }
-        public string? ShippingPhoneNumber { get; set; }
-        public string? ShippingAddress { get; set; }
-        public string? ShippingCityProvince { get; set; }
-        public string? ShippingPostalCode { get; set; }
-
+        // NEW: tracks shipping/delivery progress, separate from payment
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
-        public DateTime? EstimatedDeliveryDate { get; set; }
 
-        // True = buyer has seen the latest status. Set to false whenever
-        // the seller changes the status, so the buyer sees an "Updated!" badge.
-        public bool IsSeenByBuyer { get; set; } = true;
+        public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
 }

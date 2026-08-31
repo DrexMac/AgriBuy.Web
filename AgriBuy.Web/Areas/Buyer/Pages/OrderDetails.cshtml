@@ -1,11 +1,14 @@
 ﻿@page
 @model AgriBuy.Web.Areas.Buyer.Pages.Cart.OrderDetailsModel
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using AgriBuy.Models.Enums
+
 @{
     ViewData["Title"] = "My Orders";
 }
 
 <style>
+
     body {
         margin: 0;
         font-family: Arial, sans-serif;
@@ -18,7 +21,7 @@
 
     .orders-card {
         width: 95%;
-        max-width: 900px;
+        max-width: 1000px;
         background-color: rgba(244, 248, 237, 0.95);
         padding: 30px;
         border-radius: 12px;
@@ -39,7 +42,8 @@
         background: #fff;
         border: 1px solid #c8e6c9;
         border-radius: 10px;
-        padding: 18px 20px;
+        padding: 20px;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.05);
     }
 
     .order-box-header {
@@ -47,22 +51,45 @@
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
-        margin-bottom: 10px;
+        gap: 10px;
+        margin-bottom: 15px;
     }
 
     .order-number {
         font-weight: 700;
         color: #33691e;
-        font-size: 16px;
+        font-size: 17px;
     }
+
+    /* ============================
+           STATUS BADGES
+           ============================ */
 
     .status-badge {
         display: inline-block;
-        padding: 4px 12px;
+        padding: 6px 14px;
         border-radius: 14px;
         font-size: 13px;
         font-weight: 700;
-        background-color: #c8e6c9;
+    }
+
+    .status-Pending {
+        background-color: #fff3cd;
+        color: #7a5b00;
+    }
+
+    .status-Processing {
+        background-color: #cfe2ff;
+        color: #084298;
+    }
+
+    .status-Shipped {
+        background-color: #e2d9f3;
+        color: #4b2e83;
+    }
+
+    .status-Delivered {
+        background-color: #a5d6a7;
         color: #1b5e20;
     }
 
@@ -71,20 +98,85 @@
         color: #b71c1c;
     }
 
-    .status-Delivered {
-        background-color: #a5d6a7;
+    /* ============================
+           STATUS MESSAGE
+           ============================ */
+
+    .status-message {
+        margin: 15px 0;
+        padding: 12px 15px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .message-Pending {
+        background-color: #fff8e1;
+        color: #7a5b00;
+        border-left: 4px solid #ffc107;
+    }
+
+    .message-Processing {
+        background-color: #e3f2fd;
+        color: #084298;
+        border-left: 4px solid #2196f3;
+    }
+
+    .message-Shipped {
+        background-color: #f3e5f5;
+        color: #4b2e83;
+        border-left: 4px solid #7b1fa2;
+    }
+
+    .message-Delivered {
+        background-color: #e8f5e9;
         color: #1b5e20;
+        border-left: 4px solid #2e7d32;
+    }
+
+    .message-Cancelled {
+        background-color: #ffebee;
+        color: #b71c1c;
+        border-left: 4px solid #d32f2f;
+    }
+
+    /* ============================
+           ORDER INFO
+           ============================ */
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 25px;
+        margin-top: 10px;
+        font-size: 14px;
+        color: #444;
+    }
+
+        .info-grid strong {
+            color: #33691e;
+        }
+
+    /* ============================
+           PRODUCTS TABLE
+           ============================ */
+
+    .table-container {
+        width: 100%;
+        overflow-x: auto;
+        margin-top: 15px;
     }
 
     table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 10px;
+        min-width: 650px;
     }
 
-    th, td {
+    th,
+    td {
         border: 1px solid #ddd;
-        padding: 8px 10px;
+        padding: 9px 10px;
         text-align: left;
         font-size: 14px;
     }
@@ -92,27 +184,29 @@
     th {
         background-color: #a5d6a7;
         color: #1b5e20;
+        font-weight: 700;
     }
 
-    .info-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 6px 20px;
-        margin-top: 10px;
-        font-size: 14px;
-        color: #444;
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
     }
 
-    .info-grid strong {
-        color: #33691e;
-    }
+    /* ============================
+           NO ORDERS
+           ============================ */
 
     .no-orders {
         text-align: center;
-        padding: 20px;
+        padding: 30px 20px;
         color: #666;
         font-weight: 500;
+        background: white;
+        border-radius: 10px;
     }
+
+    /* ============================
+           BACK BUTTON
+           ============================ */
 
     .back-link {
         background-color: #2e7d32;
@@ -125,66 +219,216 @@
         transition: background-color 0.2s;
     }
 
-    .back-link:hover {
-        background-color: #27632a;
+        .back-link:hover {
+            background-color: #27632a;
+            color: white;
+        }
+
+    /* ============================
+           RESPONSIVE
+           ============================ */
+
+    @@media (max-width: 700px) {
+        body
+
+    {
+        padding: 20px 0;
+    }
+
+    .orders-card {
+        width: 92%;
+        padding: 20px;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .order-box-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
     }
 </style>
 
+
 <div class="orders-card">
-    <a asp-page="/ShoppingCart" class="back-link">← Back to Cart</a>
+
+    <a asp-page="/ShoppingCart" class="back-link">
+        ← Back to Cart
+    </a>
+
     <h1>🧾 My Orders</h1>
+
 
     @if (!Model.Orders.Any())
     {
-        <div class="no-orders">You haven't placed any orders yet.</div>
+        <div class="no-orders">
+            You haven't placed any orders yet.
+        </div>
     }
     else
     {
         @foreach (var order in Model.Orders)
         {
             <div class="order-box">
+
+                <!-- ============================
+                     ORDER HEADER
+                     ============================ -->
+
                 <div class="order-box-header">
-                    <div class="order-number">Order #@order.OrderNumber</div>
-                    <span class="status-badge status-@order.Status">@order.Status</span>
-                </div>
 
-                <div class="info-grid">
-                    <div><strong>Order Date:</strong> @order.OrderDate.ToString("MMM dd, yyyy")</div>
-                    <div><strong>Pay Date:</strong> @order.PayDate?.ToString("MMM dd, yyyy hh:mm tt")</div>
-                    <div><strong>Estimated Delivery:</strong> @order.EstimatedDeliveryDate?.ToString("MMM dd, yyyy")</div>
-                    <div><strong>Total:</strong> ₱ @order.TotalPrice.ToString("N2")</div>
-                </div>
-
-                <div class="info-grid">
-                    <div>
-                        <strong>Ship To:</strong> @order.ShippingFullName<br />
-                        @order.ShippingPhoneNumber<br />
-                        @order.ShippingAddress, @order.ShippingCityProvince @order.ShippingPostalCode
+                    <div class="order-number">
+                        Order #@order.OrderNumber
                     </div>
+
+                    <span class="status-badge status-@order.Status">
+                        @order.Status
+                    </span>
+
                 </div>
 
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Quantity</th>
-                            <th>Unit Price</th>
-                            <th>Subtotal</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in order.OrderItems)
+
+                <!-- ============================
+                     STATUS MESSAGE
+                     ============================ -->
+                @if (order.Status == OrderStatus.Pending)
+                {
+                    <div class="status-message message-Pending">
+                        ⏳ Your order is pending and is waiting to be processed by the seller.
+                    </div>
+                }
+                else if (order.Status == OrderStatus.Processing)
+                {
+                    <div class="status-message message-Processing">
+                        🔄 Your order is currently being processed by the seller.
+                    </div>
+                }
+                else if (order.Status == OrderStatus.Shipped)
+                {
+                    <div class="status-message message-Shipped">
+                        🚚 Your order has been shipped and is on its way to you.
+                    </div>
+                }
+                else if (order.Status == OrderStatus.Delivered)
+                {
+                    <div class="status-message message-Delivered">
+                        ✅ Your order has been delivered.
+                    </div>
+                }
+                else if (order.Status == OrderStatus.Cancelled)
+                {
+                    <div class="status-message message-Cancelled">
+                        ❌ This order has been cancelled.
+                    </div>
+                }
+
+
+                <!-- ============================
+                     ORDER INFORMATION
+                     ============================ -->
+
+                <div class="info-grid">
+
+                    <div>
+                        <strong>Order Date:</strong>
+                        @order.OrderDate.ToString("MMM dd, yyyy")
+                    </div>
+
+                    <div>
+                        <strong>Pay Date:</strong>
+
+                        @if (order.PayDate.HasValue)
                         {
-                            <tr>
-                                <td>@item.Product?.Name</td>
-                                <td>@item.Quantity</td>
-                                <td>₱ @item.UnitPrice.ToString("N2")</td>
-                                <td>₱ @((item.Quantity * item.UnitPrice).ToString("N2"))</td>
-                            </tr>
+                            @order.PayDate.Value.ToString("MMM dd, yyyy hh:mm tt")
                         }
-                    </tbody>
-                </table>
+                        else
+                        {
+                            <span>N/A</span>
+                        }
+                    </div>
+
+                    <div>
+                        <strong>Total:</strong>
+                        ₱ @order.TotalPrice.ToString("N2")
+                    </div>
+
+                    <div>
+                        <strong>OR Number:</strong>
+
+                        @if (!string.IsNullOrEmpty(order.ORNumber))
+                        {
+                            @order.ORNumber
+                        }
+                        else
+                        {
+                            <span>N/A</span>
+                        }
+                    </div>
+
+                    @if (order.FulfillmentDate.HasValue)
+                    {
+                        <div>
+                            <strong>Fulfillment Date:</strong>
+                            @order.FulfillmentDate.Value.ToString("MMM dd, yyyy hh:mm tt")
+                        </div>
+                    }
+
+                </div>
+
+
+                <!-- ============================
+                     PRODUCTS
+                     ============================ -->
+
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var item in order.OrderItems)
+                            {
+                                <tr>
+
+                                    <td>
+                                        @item.Product?.Name
+                                    </td>
+
+                                    <td>
+                                        @item.Quantity
+                                    </td>
+
+                                    <td>
+                                        ₱ @item.UnitPrice.ToString("N2")
+                                    </td>
+
+                                    <td>
+                                        ₱ @((item.Quantity * item.UnitPrice).ToString("N2"))
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
             </div>
         }
     }
+
 </div>

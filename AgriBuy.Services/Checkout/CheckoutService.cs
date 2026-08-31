@@ -12,6 +12,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using AgriBuy.Models.Enums;
 
 namespace AgriBuy.Services.Checkout
 {
@@ -221,6 +222,7 @@ namespace AgriBuy.Services.Checkout
 
                 order.IsPaid = true;
                 order.PayDate = DateTime.UtcNow;
+                order.Status = OrderStatus.Processing; // paid, seller now needs to process/ship it
                 await _orderService.DetachedUpdateAsync(order);
 
                 var items = await _orderItemService.GetByOrderIdAsync(order.Id);
