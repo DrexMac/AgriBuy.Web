@@ -326,6 +326,18 @@
                 }
 
 
+                @if (order.OrderDeliveryProof != null)
+                {
+                    <div style="margin:15px 0;padding:12px;background:#f1f8e9;border:1px solid #c8e6c9;border-radius:8px;">
+                        <strong style="color:#2e7d32;">Seller delivery proof</strong><br />
+                        <a href="@order.OrderDeliveryProof.ImagePath" target="_blank" rel="noopener">
+                            <img src="@order.OrderDeliveryProof.ImagePath" alt="Delivery proof for order @order.OrderNumber"
+                                 style="display:block;max-width:320px;max-height:260px;object-fit:contain;margin-top:8px;border-radius:6px;" />
+                        </a>
+                        <small>Uploaded @order.OrderDeliveryProof.UploadedAt.ToLocalTime().ToString("MMM dd, yyyy hh:mm tt")</small>
+                    </div>
+                }
+
                 <!-- ============================
                      ORDER INFORMATION
                      ============================ -->
