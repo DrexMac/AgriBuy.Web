@@ -19,7 +19,7 @@ builder.Services.AddDbContextFactory<DefaultDbContext>(dbContextOptions =>
                 maxRetryCount: 10,
                 maxRetryDelay: TimeSpan.FromSeconds(30),
                 errorNumbersToAdd: null);
-            mySqlOptions.MigrationsAssembly(typeof(Program).Assembly.FullName);
+            mySqlOptions.MigrationsAssembly(typeof(DefaultDbContext).Assembly.FullName);
         })
     .LogTo(Console.WriteLine, LogLevel.Information)
     .EnableSensitiveDataLogging()
