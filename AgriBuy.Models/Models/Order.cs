@@ -26,5 +26,6 @@ namespace AgriBuy.Models.Models
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
 
         public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+        public virtual OrderDeliveryProof? OrderDeliveryProof { get; set; }
     }
 }
