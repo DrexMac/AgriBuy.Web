@@ -243,6 +243,11 @@
 
     <h1>🧾 Order Status</h1>
 
+    @if (TempData["StatusError"] is string statusError)
+    {
+        <div style="padding:12px;background:#ffebee;color:#b71c1c;border-radius:8px;">@statusError</div>
+    }
+
 
     <!-- ==============================
          ORDERS
@@ -267,7 +272,7 @@
                         <th>OR Number</th>
                         <th>Pay Date</th>
                         <th>Status</th>
-                        <th>Update Status</th>
+                        <th>Update Status / Delivery Proof</th>
                     </tr>
                 </thead>
 
@@ -336,6 +341,7 @@
 
                                 <form method="post"
                                       asp-page-handler="UpdateStatus"
+                                      enctype="multipart/form-data"
                                       class="status-form">
 
                                     <input type="hidden"
@@ -357,6 +363,8 @@
                                         }
 
                                     </select>
+
+                                    <input type="file" name="proofImage" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" title="Delivery proof (required for Delivered)" />
 
                                     <button type="submit">
                                         Update
