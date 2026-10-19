@@ -243,6 +243,8 @@
 
     <h1>🧾 Order Status</h1>
 
+    <a asp-area="Seller" asp-page="/Notifications" style="align-self:flex-end;color:#2e7d32;font-weight:600;">View order notifications</a>
+
     @if (TempData["StatusError"] is string statusError)
     {
         <div style="padding:12px;background:#ffebee;color:#b71c1c;border-radius:8px;">@statusError</div>
