@@ -1,10 +1,8 @@
-﻿using AgriBuy.Contracts;
+using AgriBuy.Contracts;
+using AgriBuy.EntityFramework;
+using AgriBuy.Models.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AgriBuy.Services.Notifications
 {
@@ -12,73 +10,80 @@ namespace AgriBuy.Services.Notifications
     {
         private readonly IOrderService _orderService;
         private readonly IStoreService _storeService;
+        private readonly DefaultDbContext _context;
         private readonly ILogger<StoreNotificationService> _logger;
 
         public StoreNotificationService(
             IOrderService orderService,
             IStoreService storeService,
+            DefaultDbContext context,
             ILogger<StoreNotificationService> logger)
         {
             _orderService = orderService;
             _storeService = storeService;
+            _context = context;
             _logger = logger;
         }
 
         public async Task NotifyOrderAddedAsync(Guid orderId)
         {
-            try
-            {
-                var order = await _orderService.GetByIdAsync(orderId);
-                if (order == null) return;
+            var order = await _orderService.GetByIdAsync(orderId);
+            if (order == null) return;
 
-                var store = await _storeService.GetByIdAsync(order.StoreId);
-                if (store == null) return;
+            var store = await _storeService.GetByIdAsync(order.StoreId);
+            if (store == null) return;
 
-                _logger.LogInformation("Notify Store {StoreId} ({StoreName}) : Order {OrderNumber} CREATED.",
-                    store.Id, store.Name, order.OrderNumber);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to NotifyOrderAddedAsync for {OrderId}", orderId);
-            }
+            await AddAsync(store.UserId, order.Id, $"New order {order.OrderNumber} was placed.");
+            await AddAsync(order.UserId, order.Id, $"Your order {order.OrderNumber} was placed successfully.");
         }
 
         public async Task NotifyOrderPaidAsync(Guid orderId)
         {
-            try
-            {
-                var order = await _orderService.GetByIdAsync(orderId);
-                if (order == null) return;
+            var order = await _orderService.GetByIdAsync(orderId);
+            if (order == null) return;
 
-                var store = await _storeService.GetByIdAsync(order.StoreId);
-                if (store == null) return;
+            var store = await _storeService.GetByIdAsync(order.StoreId);
+            if (store == null) return;
 
-                _logger.LogInformation("Notify Store {StoreId} ({StoreName}) : Order {OrderNumber} PAID.",
-                    store.Id, store.Name, order.OrderNumber);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to NotifyOrderPaidAsync for {OrderId}", orderId);
-            }
+            await AddAsync(store.UserId, order.Id, $"Payment received for order {order.OrderNumber}.");
+            await AddAsync(order.UserId, order.Id, $"Payment for order {order.OrderNumber} was confirmed.");
         }
 
         public async Task NotifyOrderFailedAsync(Guid orderId)
         {
-            try
-            {
-                var order = await _orderService.GetByIdAsync(orderId);
-                if (order == null) return;
+            var order = await _orderService.GetByIdAsync(orderId);
+            if (order == null) return;
 
-                var store = await _storeService.GetByIdAsync(order.StoreId);
-                if (store == null) return;
+            var store = await _storeService.GetByIdAsync(order.StoreId);
+            if (store == null) return;
 
-                _logger.LogInformation("Notify Store {StoreId} ({StoreName}) : Order {OrderNumber} FAILED/CANCELLED.",
-                    store.Id, store.Name, order.OrderNumber);
-            }
-            catch (Exception ex)
+            await AddAsync(store.UserId, order.Id, $"Order {order.OrderNumber} payment failed or was cancelled.");
+            await AddAsync(order.UserId, order.Id, $"Payment for order {order.OrderNumber} failed or was cancelled.");
+        }
+
+        public async Task NotifyOrderDeliveredAsync(Guid orderId)
+        {
+            var order = await _orderService.GetByIdAsync(orderId);
+            if (order == null) return;
+            await AddAsync(order.UserId, order.Id, $"Order {order.OrderNumber} was marked delivered. View your order for the seller's delivery proof.");
+        }
+
+        private async Task AddAsync(Guid recipientUserId, Guid orderId, string message)
+        {
+            if (recipientUserId == Guid.Empty) return;
+
+            _context.Notifications.Add(new Notification
             {
-                _logger.LogError(ex, "Failed to NotifyOrderFailedAsync for {OrderId}", orderId);
-            }
+                Id = Guid.NewGuid(),
+                UserId = recipientUserId,
+                OrderId = orderId,
+                Message = message,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            await _context.SaveChangesAsync();
+            _logger.LogInformation("Stored notification for user {UserId} about order {OrderId}", recipientUserId, orderId);
         }
     }
 }
