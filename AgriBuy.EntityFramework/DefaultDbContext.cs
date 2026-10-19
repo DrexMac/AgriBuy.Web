@@ -1,14 +1,11 @@
-﻿using AgriBuy.Models.Models;
+using AgriBuy.Models.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace AgriBuy.EntityFramework
 {
     public class DefaultDbContext : DbContext
     {
-        public DefaultDbContext(DbContextOptions<DefaultDbContext> options)
-            : base(options)
-        {
-        }
+        public DefaultDbContext(DbContextOptions<DefaultDbContext> options) : base(options) { }
 
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<LoginInfo> LoginInfos { get; set; } = null!;
@@ -18,57 +15,34 @@ namespace AgriBuy.EntityFramework
         public DbSet<OrderItem> OrderItems { get; set; } = null!;
         public DbSet<Category> Categories { get; set; } = null!;
         public DbSet<ShoppingCart> ShoppingCarts { get; set; } = null!;
+        public DbSet<Notification> Notifications { get; set; } = null!;
+        public DbSet<OrderDeliveryProof> OrderDeliveryProofs { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
             ConfigureTableMappings(modelBuilder);
             ConfigureUserEmailIndex(modelBuilder);
             ConfigureRelationships(modelBuilder);
             ConfigureDecimalPrecision(modelBuilder);
             ConfigureStringLengthAndRequiredFields(modelBuilder);
 
-            // Seed sample data
             var userId1 = Guid.Parse("00000000-0000-0000-0000-000000000001");
             var storeId1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
             var productId1 = Guid.Parse("22222222-2222-2222-2222-222222222222");
             var productId2 = Guid.Parse("33333333-3333-3333-3333-333333333333");
 
-            
             modelBuilder.Entity<User>().HasData(new User
             {
-                Id = userId1,
-                FirstName = "Agri",
-                LastName = "Owner",
-                EmailAddress = "owner@agribuy.com"
+                Id = userId1, FirstName = "Agri", LastName = "Owner", EmailAddress = "owner@agribuy.com"
             });
-
             modelBuilder.Entity<Store>().HasData(new Store
             {
-                Id = storeId1,
-                Name = "AgriBuy Store",
-                UserId = userId1
+                Id = storeId1, Name = "AgriBuy Store", UserId = userId1
             });
-
             modelBuilder.Entity<Product>().HasData(
-                new Product
-                {
-                    Id = productId1,
-                    Name = "Organic Apples",
-                    UnitPrice = 5.50m,
-                    UnitOfMeasure = "Kg",
-                    StoreId = storeId1
-                },
-                new Product
-                {
-                    Id = productId2,
-                    Name = "Fresh Milk",
-                    UnitPrice = 2.20m,
-                    UnitOfMeasure = "L",
-                    StoreId = storeId1
-                }
-            );
+                new Product { Id = productId1, Name = "Organic Apples", UnitPrice = 5.50m, UnitOfMeasure = "Kg", StoreId = storeId1 },
+                new Product { Id = productId2, Name = "Fresh Milk", UnitPrice = 2.20m, UnitOfMeasure = "L", StoreId = storeId1 });
         }
 
         private void ConfigureTableMappings(ModelBuilder modelBuilder)
@@ -80,141 +54,68 @@ namespace AgriBuy.EntityFramework
             modelBuilder.Entity<Order>().ToTable("Orders");
             modelBuilder.Entity<OrderItem>().ToTable("OrderItems");
             modelBuilder.Entity<ShoppingCart>().ToTable("ShoppingCarts");
+            modelBuilder.Entity<Notification>().ToTable("Notifications");
+            modelBuilder.Entity<OrderDeliveryProof>().ToTable("OrderDeliveryProofs");
         }
 
         private void ConfigureUserEmailIndex(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>()
-                .HasIndex(u => u.EmailAddress)
-                .IsUnique();
+            modelBuilder.Entity<User>().HasIndex(u => u.EmailAddress).IsUnique();
         }
 
         private void ConfigureRelationships(ModelBuilder modelBuilder)
         {
-            // Order ↔ OrderItems
-            modelBuilder.Entity<Order>()
-                .HasMany(o => o.OrderItems)
-                .WithOne(oi => oi.Order)
-                .HasForeignKey(oi => oi.OrderId)
-                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Order>().HasMany(o => o.OrderItems).WithOne(oi => oi.Order)
+                .HasForeignKey(oi => oi.OrderId).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<OrderItem>().HasOne(oi => oi.Product).WithMany()
+                .HasForeignKey(oi => oi.ProductId).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Store>().HasMany(s => s.Products).WithOne(p => p.Store)
+                .HasForeignKey(p => p.StoreId).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Store>().HasOne(s => s.User).WithMany(u => u.Stores)
+                .HasForeignKey(s => s.UserId).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Order>().HasOne(o => o.Store).WithMany(s => s.Orders)
+                .HasForeignKey(o => o.StoreId).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ShoppingCart>().HasOne(sc => sc.User).WithMany()
+                .HasForeignKey(sc => sc.UserId).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ShoppingCart>().HasOne(sc => sc.Product).WithMany()
+                .HasForeignKey(sc => sc.ProductId).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<LoginInfo>().HasOne(li => li.User).WithMany(u => u.LoginInfos)
+                .HasForeignKey(li => li.UserId).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Order>().HasOne(o => o.User).WithMany(u => u.Orders)
+                .HasForeignKey(o => o.UserId).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Category>().HasMany(c => c.Children).WithOne(c => c.Parent)
+                .HasForeignKey(c => c.ParentId).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Category>().HasMany(c => c.Products).WithOne(p => p.Category)
+                .HasForeignKey(p => p.CategoryId).OnDelete(DeleteBehavior.SetNull);
 
-            // OrderItem ↔ Product
-            modelBuilder.Entity<OrderItem>()
-                .HasOne(oi => oi.Product)
-                .WithMany()
-                .HasForeignKey(oi => oi.ProductId)
-                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Notification>().HasOne(n => n.User).WithMany()
+                .HasForeignKey(n => n.UserId).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Notification>().Property(n => n.Message).IsRequired().HasMaxLength(500);
+            modelBuilder.Entity<Notification>().HasIndex(n => new { n.UserId, n.IsRead, n.CreatedAt });
 
-            // Store ↔ Products
-            modelBuilder.Entity<Store>()
-                .HasMany(s => s.Products)
-                .WithOne(p => p.Store)
-                .HasForeignKey(p => p.StoreId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // Store ↔ User
-            modelBuilder.Entity<Store>()
-                .HasOne(s => s.User)
-                .WithMany(u => u.Stores)
-                .HasForeignKey(s => s.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            //  Store ↔ Orders (NEW)
-            modelBuilder.Entity<Order>()
-                .HasOne(o => o.Store)
-                .WithMany(s => s.Orders)
-                .HasForeignKey(o => o.StoreId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // ShoppingCart ↔ User
-            modelBuilder.Entity<ShoppingCart>()
-                .HasOne(sc => sc.User)
-                .WithMany()
-                .HasForeignKey(sc => sc.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // ShoppingCart ↔ Product
-            modelBuilder.Entity<ShoppingCart>()
-                .HasOne(sc => sc.Product)
-                .WithMany()
-                .HasForeignKey(sc => sc.ProductId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // LoginInfo ↔ User
-            modelBuilder.Entity<LoginInfo>()
-                .HasOne(li => li.User)
-                .WithMany(u => u.LoginInfos)
-                .HasForeignKey(li => li.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // Order ↔ User
-            modelBuilder.Entity<Order>()
-                .HasOne(o => o.User)
-                .WithMany(u => u.Orders)
-                .HasForeignKey(o => o.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // Category ↔ Subcategories
-            modelBuilder.Entity<Category>()
-                .HasMany(c => c.Children)
-                .WithOne(c => c.Parent)
-                .HasForeignKey(c => c.ParentId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Category ↔ Products
-            modelBuilder.Entity<Category>()
-                .HasMany(c => c.Products)
-                .WithOne(p => p.Category)
-                .HasForeignKey(p => p.CategoryId)
-                .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<OrderDeliveryProof>().HasOne(p => p.Order).WithMany()
+                .HasForeignKey(p => p.OrderId).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<OrderDeliveryProof>().HasOne(p => p.UploadedByUser).WithMany()
+                .HasForeignKey(p => p.UploadedByUserId).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<OrderDeliveryProof>().Property(p => p.ImagePath).IsRequired().HasMaxLength(500);
+            modelBuilder.Entity<OrderDeliveryProof>().HasIndex(p => p.OrderId).IsUnique();
         }
-
 
         private void ConfigureDecimalPrecision(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Product>()
-                .Property(p => p.UnitPrice)
-                .HasColumnType("decimal(18,2)");
-
-            modelBuilder.Entity<OrderItem>()
-                .Property(oi => oi.UnitPrice)
-                .HasColumnType("decimal(18,2)");
-
-            modelBuilder.Entity<OrderItem>()
-                .Property(oi => oi.ItemPrice)
-                .HasColumnType("decimal(18,2)");
-
-            modelBuilder.Entity<Order>()
-                .Property(o => o.TotalPrice)
-                .HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<Product>().Property(p => p.UnitPrice).HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<OrderItem>().Property(oi => oi.UnitPrice).HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<OrderItem>().Property(oi => oi.ItemPrice).HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<Order>().Property(o => o.TotalPrice).HasColumnType("decimal(18,2)");
         }
 
         private void ConfigureStringLengthAndRequiredFields(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>()
-                .Property(u => u.EmailAddress)
-                .IsRequired()
-                .HasMaxLength(255);
-
-            modelBuilder.Entity<User>()
-                .Property(u => u.FirstName)
-                .IsRequired()
-                .HasMaxLength(100);
-
-            modelBuilder.Entity<User>()
-                .Property(u => u.LastName)
-                .IsRequired()
-                .HasMaxLength(100);
-
-            modelBuilder.Entity<Product>()
-                .Property(p => p.Name)
-                .IsRequired()
-                .HasMaxLength(255);
-
-            modelBuilder.Entity<Store>()
-                .Property(s => s.Name)
-                .IsRequired()
-                .HasMaxLength(255);
+            modelBuilder.Entity<User>().Property(u => u.EmailAddress).IsRequired().HasMaxLength(255);
+            modelBuilder.Entity<User>().Property(u => u.FirstName).IsRequired().HasMaxLength(100);
+            modelBuilder.Entity<User>().Property(u => u.LastName).IsRequired().HasMaxLength(100);
+            modelBuilder.Entity<Product>().Property(p => p.Name).IsRequired().HasMaxLength(255);
+            modelBuilder.Entity<Store>().Property(s => s.Name).IsRequired().HasMaxLength(255);
         }
     }
 }
