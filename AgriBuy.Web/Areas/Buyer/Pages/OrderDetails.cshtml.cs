@@ -33,6 +33,7 @@ namespace AgriBuy.Web.Areas.Buyer.Pages.Cart
 
             // Load all paid orders belonging to this buyer
             Orders = await _context.Orders
+                .Include(o => o.OrderDeliveryProof)
                 .Include(o => o.OrderItems)
                     .ThenInclude(i => i.Product)
                 .Where(o =>
