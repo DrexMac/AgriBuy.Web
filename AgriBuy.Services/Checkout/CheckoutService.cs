@@ -13,6 +13,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using AgriBuy.Models.Enums;
+using AgriBuy.Services.Notifications;
 
 namespace AgriBuy.Services.Checkout
 {
@@ -25,6 +26,7 @@ namespace AgriBuy.Services.Checkout
         private readonly IHttpClientFactory _httpFactory;
         private readonly IConfiguration _config;
         private readonly ILogger<CheckoutService> _logger;
+        private readonly IStoreNotificationService _notifications;
 
         private const string PayMongoCheckoutSessionsEndpoint = "https://api.paymongo.com/v1/checkout_sessions";
 
@@ -35,7 +37,8 @@ namespace AgriBuy.Services.Checkout
             IProductService productService,
             IHttpClientFactory httpFactory,
             IConfiguration config,
-            ILogger<CheckoutService> logger)
+            ILogger<CheckoutService> logger,
+            IStoreNotificationService notifications)
         {
             _cartService = cartService;
             _orderService = orderService;
@@ -44,6 +47,7 @@ namespace AgriBuy.Services.Checkout
             _httpFactory = httpFactory;
             _config = config;
             _logger = logger;
+            _notifications = notifications;
         }
 
         public async Task<string> CreateCheckoutAndGetRedirectUrlAsync(
@@ -107,6 +111,10 @@ namespace AgriBuy.Services.Checkout
                 }
 
                 createdOrders.Add(orderDto);
+
+                // Notification failures must not interrupt checkout creation.
+                try { await _notifications.NotifyOrderAddedAsync(orderDto.Id); }
+                catch (Exception ex) { _logger.LogWarning(ex, "Order-created notification failed for {OrderId}", orderDto.Id); }
             }
 
             var secretKey = _config["PayMongo:SecretKey"];
@@ -224,6 +232,9 @@ namespace AgriBuy.Services.Checkout
                 order.PayDate = DateTime.UtcNow;
                 order.Status = OrderStatus.Processing; // paid, seller now needs to process/ship it
                 await _orderService.DetachedUpdateAsync(order);
+
+                try { await _notifications.NotifyOrderPaidAsync(order.Id); }
+                catch (Exception ex) { _logger.LogWarning(ex, "Payment notification failed for {OrderId}", order.Id); }
 
                 var items = await _orderItemService.GetByOrderIdAsync(order.Id);
                 foreach (var item in items)
