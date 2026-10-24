@@ -116,7 +116,8 @@
         <div class="store-actions mb-3">
             <a asp-page="Edit" asp-route-storeid="@Model.Store.Id" class="btn btn-primary back-link">Edit</a>
             <a asp-area="Seller" asp-page="/Products/Create" asp-route-storeid="@Model.Store.Id" class="btn btn-success back-link">Add Product</a>
-            <a asp-area="Seller" asp-page="/Orders/Status" asp-route-storeid="@Model.Store.Id" class="btn btn-warning back-link"> View Orders</a>
+            <a asp-area="Seller" asp-page="/Orders/Status" asp-route-storeid="@Model.Store.Id" class="btn btn-warning back-link"> Sales Order</a>
+            <a asp-area="Seller" asp-page="/Notifications" class="btn btn-info back-link">Notifications</a>
         </div>
 
         <hr />

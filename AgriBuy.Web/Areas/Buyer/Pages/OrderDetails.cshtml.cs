@@ -3,10 +3,6 @@ using AgriBuy.Models.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace AgriBuy.Web.Areas.Buyer.Pages.Cart
 {
@@ -23,7 +19,7 @@ namespace AgriBuy.Web.Areas.Buyer.Pages.Cart
 
         public async Task<IActionResult> OnGetAsync()
         {
-            // Get logged-in buyer
+            // Get the logged-in buyer.
             var userIdStr = HttpContext.Session.GetString("UserId");
 
             if (!Guid.TryParse(userIdStr, out var userId))
@@ -31,9 +27,10 @@ namespace AgriBuy.Web.Areas.Buyer.Pages.Cart
                 return RedirectToPage("/Accounts/Login");
             }
 
-            // Load all paid orders belonging to this buyer
+            // Load paid orders belonging to this buyer.
+            // DeliveryImagePath is a string property on Order,
+            // so it does not require Include().
             Orders = await _context.Orders
-                .Include(o => o.OrderDeliveryProof)
                 .Include(o => o.OrderItems)
                     .ThenInclude(i => i.Product)
                 .Where(o =>

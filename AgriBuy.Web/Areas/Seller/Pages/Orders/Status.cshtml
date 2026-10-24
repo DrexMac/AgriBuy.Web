@@ -38,8 +38,8 @@
     }
 
     /* ==============================
-           BACK TO STORE
-           ============================== */
+               BACK TO STORE
+               ============================== */
 
     .back-link {
         align-self: flex-start;
@@ -55,8 +55,8 @@
         }
 
     /* ==============================
-           TABLE
-           ============================== */
+               TABLE
+               ============================== */
 
     .table-container {
         max-height: 500px;
@@ -98,8 +98,8 @@
     }
 
     /* ==============================
-           STATUS BADGES
-           ============================== */
+               STATUS BADGES
+               ============================== */
 
     .status-badge {
         padding: 5px 11px;
@@ -136,8 +136,8 @@
     }
 
     /* ==============================
-           STATUS FORM
-           ============================== */
+               STATUS FORM
+               ============================== */
 
     .status-form {
         display: flex;
@@ -168,8 +168,8 @@
             }
 
     /* ==============================
-           NO ORDERS
-           ============================== */
+               NO ORDERS
+               ============================== */
 
     .no-orders {
         text-align: center;
@@ -179,8 +179,8 @@
     }
 
     /* ==============================
-           SCROLLBAR
-           ============================== */
+               SCROLLBAR
+               ============================== */
 
     .table-container::-webkit-scrollbar {
         width: 8px;
@@ -197,8 +197,8 @@
         }
 
     /* ==============================
-           MOBILE
-           ============================== */
+               MOBILE
+               ============================== */
 
     @@media (max-width: 700px) {
 
@@ -241,9 +241,7 @@
          PAGE TITLE
          ============================== -->
 
-    <h1>🧾 Order Status</h1>
-
-    <a asp-area="Seller" asp-page="/Notifications" style="align-self:flex-end;color:#2e7d32;font-weight:600;">View order notifications</a>
+    <h1>🧾 Sales Order</h1>
 
     @if (TempData["StatusError"] is string statusError)
     {
@@ -270,6 +268,7 @@
                     <tr>
                         <th>Order #</th>
                         <th>Buyer</th>
+                        <th>Products</th>
                         <th>Total Price</th>
                         <th>OR Number</th>
                         <th>Pay Date</th>
@@ -297,6 +296,37 @@
                                 @($"{order.User?.FirstName} {order.User?.LastName}")
                             </td>
 
+                            <!-- ORDERED PRODUCTS AND THEIR ORIGINAL PRODUCT IMAGES -->
+                            <td>
+                                @if (order.OrderItems != null && order.OrderItems.Any())
+                                {
+                                    foreach (var item in order.OrderItems)
+                                    {
+                                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;min-width:180px;">
+                                            @if (!string.IsNullOrWhiteSpace(item.Product?.ImagePath))
+                                            {
+                                                <img src="@item.Product.ImagePath"
+                                                     alt="@item.Product.Name"
+                                                     style="width:55px;height:55px;object-fit:cover;border-radius:6px;border:1px solid #ddd;" />
+                                            }
+                                            else
+                                            {
+                                                <div style="width:55px;height:55px;display:flex;align-items:center;justify-content:center;background:#f3f3f3;border-radius:6px;font-size:10px;text-align:center;">
+                                                    No image
+                                                </div>
+                                            }
+                                            <div>
+                                                <strong>@(item.Product?.Name ?? "Product unavailable")</strong><br />
+                                                <small>Qty: @item.Quantity</small>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <span>No order items found</span>
+                                }
+                            </td>
 
                             <!-- TOTAL PRICE -->
                             <td>

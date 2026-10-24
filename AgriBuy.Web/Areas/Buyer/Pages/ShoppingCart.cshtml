@@ -52,37 +52,42 @@
     }
 
     /* =========================================
-           BACK BUTTON
+           NAVIGATION BUTTONS
            ========================================= */
 
-    a.back-link {
-        display: inline-flex;
+    .back-links {
+        display: flex;
         align-items: center;
-        align-self: flex-start;
-        background-color: #2e7d32;
-        color: white;
-        font-weight: 600;
-        padding: 0.5rem 1rem;
-        border-radius: 6px;
-        text-decoration: none;
-        margin-bottom: 12px;
-        transition: background-color 0.2s;
+        gap: 10px;
         flex-shrink: 0;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
     }
 
-        a.back-link:hover {
-            background-color: #27632a;
+        .back-links a.back-link {
+            display: inline-flex;
+            align-items: center;
+            align-self: auto;
+            background-color: #2e7d32;
+            color: white;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            margin-bottom: 0;
+            transition: background-color 0.2s;
         }
+
+            .back-links a.back-link:hover {
+                background-color: #27632a;
+                color: white;
+            }
 
     /* =========================================
            CART WINDOW
            ========================================= */
 
     .cart-window {
-        /*
-             * This is the main shopping cart area.
-             * It takes all remaining available space.
-             */
         flex: 1;
         min-height: 0;
         display: flex;
@@ -291,16 +296,6 @@
            RECENT ORDERS WINDOW
            ========================================= */
 
-    /*
-         * Reduced from 165px to 150px.
-         *
-         * This gives the Shopping Cart window
-         * slightly more vertical space.
-         *
-         * Recent Orders still shows approximately
-         * 3 rows before scrolling.
-         */
-
     .recent-orders-window {
         flex: 0 0 150px;
         height: 150px;
@@ -415,7 +410,6 @@
            ========================================= */
 
     @@media (max-width: 700px) {
-
         body {
             padding: 15px 0;
         }
@@ -454,27 +448,39 @@
     }
 </style>
 
-
 <div class="cart-card">
 
-    <!-- =====================================
-         HEADER
-         ===================================== -->
+    <!-- HEADER -->
 
     <h2 class="cart-header">
         🛒 My Shopping Cart
     </h2>
 
+    <!-- NAVIGATION BUTTONS -->
 
-    <a asp-page="/Landing" class="back-link">
-        <i class="bi bi-arrow-left"></i>
-        Continue Shopping
-    </a>
+    <div class="back-links">
 
+        <a asp-page="/Landing" class="back-link">
+            <i class="bi bi-arrow-left"></i>
+            Continue Shopping
+        </a>
 
-    <!-- =====================================
-         SHOPPING CART WINDOW
-         ===================================== -->
+        <a asp-area="Buyer"
+           asp-page="/OrderDetails"
+           class="back-link">
+            My Orders
+        </a>
+
+        <a asp-area="Buyer"
+           asp-page="/Notifications"
+           class="back-link">
+            <i class="bi bi-bell"></i>
+            Notifications
+        </a>
+
+    </div>
+
+    <!-- SHOPPING CART WINDOW -->
 
     <div class="cart-window">
 
@@ -489,7 +495,6 @@
             <div class="cart-table-container">
 
                 <table class="cart-table">
-
                     <thead>
                         <tr>
                             <th>Product</th>
@@ -502,21 +507,15 @@
                     </thead>
 
                     <tbody>
-
                         @foreach (var item in Model.CartItems)
                         {
                             <tr>
-
                                 <td>
-
                                     <img src="@Url.Content(item.ImagePath ?? "~/images/placeholder.png")"
                                          alt="@item.ProductName"
                                          class="product-img" />
-
                                     <br />
-
                                     @item.ProductName
-
                                 </td>
 
                                 <td>
@@ -524,19 +523,12 @@
                                 </td>
 
                                 <td>
-
                                     <div class="qty-control">
-
                                         <form method="post"
                                               asp-page-handler="Decrease"
                                               asp-route-cartItemId="@item.Id"
                                               style="display:inline;">
-
-                                            <button type="submit"
-                                                    class="qty-btn">
-                                                -
-                                            </button>
-
+                                            <button type="submit" class="qty-btn">-</button>
                                         </form>
 
                                         <span class="qty-display">
@@ -547,16 +539,9 @@
                                               asp-page-handler="Increase"
                                               asp-route-cartItemId="@item.Id"
                                               style="display:inline;">
-
-                                            <button type="submit"
-                                                    class="qty-btn">
-                                                +
-                                            </button>
-
+                                            <button type="submit" class="qty-btn">+</button>
                                         </form>
-
                                     </div>
-
                                 </td>
 
                                 <td>
@@ -568,83 +553,52 @@
                                 </td>
 
                                 <td>
-
                                     <form method="post"
                                           asp-page-handler="Remove"
                                           asp-route-cartItemId="@item.Id">
-
-                                        <button type="submit"
-                                                class="btn btn-sm btn-danger">
+                                        <button type="submit" class="btn btn-sm btn-danger">
                                             Remove
                                         </button>
-
                                     </form>
-
                                 </td>
-
                             </tr>
                         }
-
                     </tbody>
-
                 </table>
 
             </div>
 
-
-            <!-- =================================
-                 CART TOTAL
-                 ================================= -->
+            <!-- CART TOTAL -->
 
             <div class="order-total">
-
                 Total:
+                ₱ @(Model.CartItems.Sum(x => x.UnitPrice * x.Quantity).ToString("N2"))
+            </div>
 
-                ₱ @(Model.CartItems
-                            .Sum(x => x.UnitPrice * x.Quantity)
-                            .ToString("N2"))
-
-        </div>
-
-
-            <!-- =================================
-                 CART BUTTONS
-                 ================================= -->
+            <!-- CART BUTTONS -->
 
             <div class="cart-actions">
-
                 <form method="post"
                       asp-page-handler="Clear"
                       style="display:inline;">
-
-                    <button type="submit"
-                            class="clear-btn">
+                    <button type="submit" class="clear-btn">
                         Clear Cart
                     </button>
-
                 </form>
-
 
                 <form method="post"
                       asp-page-handler="Checkout"
                       style="display:inline;">
-
-                    <button type="submit"
-                            class="checkout-btn">
+                    <button type="submit" class="checkout-btn">
                         Proceed Checkout
                     </button>
-
                 </form>
-
             </div>
-                }
+        }
 
     </div>
 
-
-    <!-- =====================================
-         RECENT ORDERS
-         ===================================== -->
+    <!-- RECENT ORDERS -->
     @if (Model.RecentPaidOrders.Any())
     {
         <hr />
@@ -653,13 +607,9 @@
             🧾 Recent Orders
         </h3>
 
-
         <div class="recent-orders-window">
-
             <div class="recent-orders">
-
                 <table>
-
                     <thead>
                         <tr>
                             <th>OR Number</th>
@@ -672,15 +622,12 @@
                         </tr>
                     </thead>
 
-
                     <tbody>
-
                         @foreach (var order in Model.RecentPaidOrders)
                         {
                             foreach (var item in order.OrderItems)
                             {
                                 <tr>
-
                                     <td>
                                         @order.ORNumber
                                     </td>
@@ -706,23 +653,16 @@
                                     </td>
 
                                     <td>
-
                                         <span class="status-badge status-@order.Status">
                                             @order.Status
                                         </span>
-
                                     </td>
-
                                 </tr>
                             }
                         }
-
                     </tbody>
-
                 </table>
-
             </div>
-
         </div>
     }
 

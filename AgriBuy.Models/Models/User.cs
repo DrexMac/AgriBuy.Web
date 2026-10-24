@@ -10,17 +10,26 @@ namespace AgriBuy.Models.Models
         [Required]
         [MaxLength(100)]
         public string? FirstName { get; set; }
+
         public string? LastName { get; set; }
+
         public UserRole Role { get; set; }
+
         public int Points { get; set; }
+
         public bool IsDeleted { get; set; }
+
         public bool? IsActive { get; set; }
-        public ICollection<LoginInfo> LoginInfos { get; set; } = new List<LoginInfo>();
-        public ICollection<Order> Orders { get; set; } = new List<Order>();
+
+        public ICollection<LoginInfo> LoginInfos { get; set; }
+            = new List<LoginInfo>();
+
+        public ICollection<Order> Orders { get; set; }
+            = new List<Order>();
+
         public string? PasswordHash { get; set; }
-        public Store? Store { get; set; }
-        public ShoppingCart? ShoppingCart { get; set; }
 
         public ICollection<Store>? Stores { get; set; }
+            = new List<Store>();
     }
 }

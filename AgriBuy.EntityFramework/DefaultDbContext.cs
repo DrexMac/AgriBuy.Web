@@ -93,8 +93,11 @@ namespace AgriBuy.EntityFramework
             modelBuilder.Entity<Notification>().Property(n => n.Message).IsRequired().HasMaxLength(500);
             modelBuilder.Entity<Notification>().HasIndex(n => new { n.UserId, n.IsRead, n.CreatedAt });
 
-            modelBuilder.Entity<OrderDeliveryProof>().HasOne(p => p.Order).WithOne(o => o.OrderDeliveryProof)
-                .HasForeignKey(p => p.OrderId).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<OrderDeliveryProof>()
+                .HasOne(p => p.Order)
+                .WithOne(o => o.OrderDeliveryProof)
+                .HasForeignKey<OrderDeliveryProof>(p => p.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<OrderDeliveryProof>().HasOne(p => p.UploadedByUser).WithMany()
                 .HasForeignKey(p => p.UploadedByUserId).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<OrderDeliveryProof>().Property(p => p.ImagePath).IsRequired().HasMaxLength(500);
